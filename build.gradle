@@ -14,6 +14,8 @@
 // application.gradle.version property in <GHIDRA_INSTALL_DIR>/Ghidra/application.properties
 // for the correction version of Gradle to use for the Ghidra installation you specify.
 
+apply plugin: 'java'
+apply plugin: 'eclipse'
 //----------------------START "DO NOT MODIFY" SECTION------------------------------
 def ghidraInstallDir
 
@@ -31,3 +33,53 @@ else {
 	throw new GradleException("GHIDRA_INSTALL_DIR is not defined!")
 }
 //----------------------END "DO NOT MODIFY" SECTION-------------------------------
+
+// from https://github.com/astrelsky/vscode-ghidra-skeleton/blob/master/skeleton/build.gradle
+def docs = file(ghidraInstallDir+'/docs/GhidraAPI_javadoc.zip')
+
+eclipse {
+    classpath {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+
+eclipse.classpath.file.whenMerged {
+	File javaDoc = new File(ghidraInstallDir+"/docs/GhidraAPI_javadoc.zip");
+	for (entry in entries) {
+		if (entry.path.contains('jar')) {
+			File folder = new File(entry.getPath()).getParentFile();
+			for (File file : folder.listFiles()) {
+				if (file.getName().endsWith(".zip")) {
+					if (file.getName().contains("-src")) {
+						entry.setSourcePath(it.fileReference(file));
+					}
+					entry.setJavadocPath(it.fileReference(javaDoc));
+				}
+			}
+		}
+	}
+}
+
+buildExtension {
+	exclude '.vscode'
+	exclude 'gradle*'
+	exclude '.editorconfig'
+}
+
+buildExtension.dependsOn 'clean_dist'
+
+task clean_dist(type: Delete) {
+	delete fileTree('dist').files
+}
+
+task install(type: Copy) {
+	def zipFile = fileTree('dist').files[0]
+    def outputDir = file("${ghidraInstallDir}/Ghidra/Extensions")
+	delete fileTree("${ghidraInstallDir}/Ghidra/Extensions/${project.name}").files
+ 
+    from zipTree(zipFile)
+    into outputDir
+}
+
+install.dependsOn 'buildExtension'
