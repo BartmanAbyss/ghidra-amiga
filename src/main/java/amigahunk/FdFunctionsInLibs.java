@@ -11,7 +11,6 @@ import java.util.Map.Entry;
 import ghidra.framework.Application;
 
 public class FdFunctionsInLibs {
-	
 	private List<FdFunction> funcsList;
 	private List<String> libsList;
 	private List<Entry<String, FdLibFunctions>> libFuncs;
@@ -62,8 +61,7 @@ public class FdFunctionsInLibs {
 		if (filter == null || filter.size() == 0) {
 			return funcsList.stream().filter(e -> e.getBias() == bias).toArray(FdFunction[]::new);
 		} else {
-			return funcsList.stream().filter(e -> (filter.contains(e.getLib().toLowerCase()) && e.getBias() == bias
-											 )).toArray(FdFunction[]::new);
+			return funcsList.stream().filter(e -> (filter.contains(e.getLib().toLowerCase()) && e.getBias() == bias)).toArray(FdFunction[]::new);
 		}
 	}
 	
@@ -71,8 +69,7 @@ public class FdFunctionsInLibs {
 		if (filter == null || filter.size() == 0) {
 			return funcsList.toArray(FdFunction[]::new);
 		} else {
-			return funcsList.stream().filter(e -> filter.contains(e.getLib().toLowerCase())
-											 ).toArray(FdFunction[]::new);
+			return funcsList.stream().filter(e -> filter.contains(e.getLib().toLowerCase())).toArray(FdFunction[]::new);
 		}
 	}
 	

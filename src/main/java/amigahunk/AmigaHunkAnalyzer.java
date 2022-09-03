@@ -54,9 +54,7 @@ import ghidra.util.exception.InvalidInputException;
 import ghidra.util.task.TaskMonitor;
 
 public class AmigaHunkAnalyzer extends AbstractAnalyzer {
-
 	//private static final int imageBaseOffset = 0x10000;
-	
 	private final List<String> filter = new ArrayList<String>();
 	private FdFunctionsInLibs funcsList;
 	
@@ -89,7 +87,6 @@ public class AmigaHunkAnalyzer extends AbstractAnalyzer {
 	
 	@Override
 	public void registerOptions(Options options, Program program) {
-		
 		if (funcsList == null) {
 			return;
 		}
@@ -210,10 +207,7 @@ public class AmigaHunkAnalyzer extends AbstractAnalyzer {
 		}
 	}
 	
-	public AddressSetView flowConstants(final Program program, Address flowStart,
-			AddressSetView flowSet, final SymbolicPropogator symEval, final TaskMonitor monitor)
-			throws CancelledException {
-
+	public AddressSetView flowConstants(final Program program, Address flowStart, AddressSetView flowSet, final SymbolicPropogator symEval, final TaskMonitor monitor) throws CancelledException {
 		ConstantPropagationContextEvaluator eval =
 			new ConstantPropagationContextEvaluator(true) {
 				@Override

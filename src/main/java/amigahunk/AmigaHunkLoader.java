@@ -220,7 +220,6 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 		}
 		
 		addSymbols(bi.getSegments(), fpa.getCurrentProgram().getSymbolTable(), addrs, fpa);
-		
 	}
 	
 	private static void addSymbols(Segment segs[], SymbolTable st, int addrs[], FlatProgramAPI fpa) throws Throwable {
@@ -622,7 +621,6 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 		try {
 			DataUtilities.createData(program, exec.getStart(), new PointerDataType((new ExecLibrary()).toDataType()), -1, false,
 					ClearDataMode.CLEAR_ALL_UNDEFINED_CONFLICT_DATA);
-
 		} catch (DuplicateNameException | IOException | CodeUnitInsertionException e) {
 			log.appendException(e);
 		}
@@ -660,8 +658,7 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 	}
 
 	@Override
-	public List<Option> getDefaultOptions(ByteProvider provider, LoadSpec loadSpec, DomainObject domainObject,
-			boolean isLoadIntoProgram) {
+	public List<Option> getDefaultOptions(ByteProvider provider, LoadSpec loadSpec, DomainObject domainObject, boolean isLoadIntoProgram) {
 		List<Option> list = new ArrayList<Option>();
 
 		LanguageCompilerSpecPair pair = loadSpec.getLanguageCompilerSpec();
@@ -678,7 +675,6 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 
 	@Override
 	public String validateOptions(ByteProvider provider, LoadSpec loadSpec, List<Option> options, Program program) {
-
 		imageBase = null;
 
 		for (Option option : options) {

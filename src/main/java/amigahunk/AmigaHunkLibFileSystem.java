@@ -40,7 +40,6 @@ import hunk.HunkIndexBlock;
 		description = "Amiga Hunk Library File",
 		factory = AmigaHunkLibFileSystem.AmigaHunkLibFileSystemFactory.class)
 public class AmigaHunkLibFileSystem implements GFileSystem {
-
 	private final FSRLRoot fsFSRL;
 	private FileSystemIndexHelper<LibHunkItem> fsih;
 	private FileSystemRefManager refManager = new FileSystemRefManager(this);
@@ -307,5 +306,4 @@ public class AmigaHunkLibFileSystem implements GFileSystem {
 		private long offset;
 		private long size;
 	}
-
 }

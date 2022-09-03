@@ -8,7 +8,6 @@ import ghidra.program.model.lang.Register;
 import ghidra.program.model.listing.Program;
 
 public class FdFunction {
-	
 	private final String lib;
 	private final String name;
 	private final int bias;
@@ -72,12 +71,12 @@ public class FdFunction {
 			
 			if (withReg) {
 				sb.append(args.entrySet().stream()
-						.map(e -> e.getKey() + "/" + e.getValue())
-						.collect(Collectors.joining(", ")));
+					.map(e -> e.getKey() + "/" + e.getValue())
+					.collect(Collectors.joining(", ")));
 			} else {
 				sb.append(args.entrySet().stream()
-						.map(Object::toString)
-						.collect(Collectors.joining(", ")));
+					.map(Object::toString)
+					.collect(Collectors.joining(", ")));
 			}
 			
 			sb.append(" )");
@@ -90,7 +89,7 @@ public class FdFunction {
 			return new Register[] {};
 		} else {
 			return args.entrySet().stream()
-					.map(e -> new Register(program.getRegister(e.getValue()))).toArray(Register[]::new);
+				.map(e -> new Register(program.getRegister(e.getValue()))).toArray(Register[]::new);
 		}
 	}
 }
