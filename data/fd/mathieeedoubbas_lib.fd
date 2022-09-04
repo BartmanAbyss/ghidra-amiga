@@ -1,4 +1,3 @@
-* "mathieeedoubbas.library"
 ##base _MathIeeeDoubBasBase
 ##bias 30
 ##public
@@ -12,7 +11,7 @@ IEEEDPAdd(leftParm,rightParm)(d0/d1/d2/d3)
 IEEEDPSub(leftParm,rightParm)(d0/d1/d2/d3)
 IEEEDPMul(factor1,factor2)(d0/d1/d2/d3)
 IEEEDPDiv(dividend,divisor)(d0/d1/d2/d3)
-*--- functions in V33 or higher (distributed as Release 1.2) ---
+*--- functions in V33 or higher (Release 1.2) ---
 IEEEDPFloor(parm)(d0/d1)
 IEEEDPCeil(parm)(d0/d1)
 ##end

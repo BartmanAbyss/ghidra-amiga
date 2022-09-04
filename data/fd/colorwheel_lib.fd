@@ -1,8 +1,7 @@
-* "colorwheel.gadget"
 ##base _ColorWheelBase
 ##bias 30
 ##public
-*--- functions in V39 or higher (beta release for developers only) ---
+*--- functions in V39 or higher (Release 3) ---
 ##public
 *
 * Public entries

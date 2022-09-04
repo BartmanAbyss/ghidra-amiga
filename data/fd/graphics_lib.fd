@@ -1,4 +1,3 @@
-* "graphics.library"
 ##base _GfxBase
 ##bias 30
 ##public
@@ -108,10 +107,12 @@ XorRegionRegion(srcRegion,destRegion)(a0/a1)
 AndRegionRegion(srcRegion,destRegion)(a0/a1)
 SetRGB4CM(colorMap,index,red,green,blue)(a0,d0/d1/d2/d3)
 BltMaskBitMapRastPort(srcBitMap,xSrc,ySrc,destRP,xDest,yDest,xSize,ySize,minterm,bltMask)(a0,d0/d1/a1,d2/d3/d4/d5/d6/a2)
-GfxInternal1()()
-GfxInternal2()()
+##private
+graphicsPrivate1()()
+graphicsPrivate2()()
+##public
 AttemptLockLayerRom(layer)(a5)
-*--- functions in V36 or higher (distributed as Release 2.0) ---
+*--- functions in V36 or higher (Release 2.0) ---
 GfxNew(gfxNodeType)(d0)
 GfxFree(gfxNodePtr)(a0)
 GfxAssociate(associateNode,gfxNodePtr)(a0/a1)
@@ -126,9 +127,9 @@ CloseMonitor(monitorSpec)(a0)
 FindDisplayInfo(displayID)(d0)
 NextDisplayInfo(displayID)(d0)
 ##private
-graphicsPrivate1()()
-graphicsPrivate2()()
 graphicsPrivate3()()
+graphicsPrivate4()()
+graphicsPrivate5()()
 ##public
 GetDisplayInfoData(handle,buf,size,tagID,displayID)(a0/a1,d0/d1/d2)
 FontExtent(font,fontExtent)(a0/a1)
@@ -138,15 +139,19 @@ ReadPixelArray8(rp,xstart,ystart,xstop,ystop,array,temprp)(a0,d0/d1/d2/d3/a2,a1)
 WritePixelArray8(rp,xstart,ystart,xstop,ystop,array,temprp)(a0,d0/d1/d2/d3/a2,a1)
 GetVPModeID(vp)(a0)
 ModeNotAvailable(modeID)(d0)
-WeighTAMatch(reqTextAttr,targetTextAttr,targetTags)(a0/a1/a2)
+##private
+graphicsPrivate6()()
+##public
 EraseRect(rp,xMin,yMin,xMax,yMax)(a1,d0/d1/d2/d3)
 ExtendFont(font,fontTags)(a0/a1)
 StripFont(font)(a0)
-*--- functions in V39 or higher (beta release for developers only) ---
+*--- functions in V39 or higher (Release 3) ---
 CalcIVG(v,vp)(a0/a1)
 AttachPalExtra(cm,vp)(a0/a1)
 ObtainBestPenA(cm,r,g,b,tags)(a0,d1/d2/d3/a1)
-GfxInternal3()()
+##private
+graphicsPrivate7()()
+##public
 SetRGB32(vp,n,r,g,b)(a0,d0/d1/d2/d3)
 GetAPen(rp)(a0)
 GetBPen(rp)(a0)
@@ -156,9 +161,9 @@ LoadRGB32(vp,table)(a0/a1)
 SetChipRev(want)(d0)
 SetABPenDrMd(rp,apen,bpen,drawmode)(a1,d0/d1/d2)
 GetRGB32(cm,firstcolor,ncolors,table)(a0,d0/d1/a1)
-GfxSpare1()()
 ##private
-graphicsPrivate4()()
+graphicsPrivate8()()
+graphicsPrivate9()()
 ##public
 AllocBitMap(sizex,sizey,depth,flags,friend_bitmap)(d0/d1/d2/d3/a0)
 FreeBitMap(bm)(a0)
@@ -176,11 +181,15 @@ SetMaxPen(rp,maxpen)(a0,d0)
 SetRGB32CM(cm,n,r,g,b)(a0,d0/d1/d2/d3)
 ScrollRasterBF(rp,dx,dy,xMin,yMin,xMax,yMax)(a1,d0/d1/d2/d3/d4/d5)
 FindColor(cm,r,g,b,maxcolor)(a3,d1/d2/d3/d4)
-GfxSpare2()()
+##private
+graphicsPrivate10()()
+##public
 AllocSpriteDataA(bm,tags)(a2,a1)
 ChangeExtSpriteA(vp,oldsprite,newsprite,tags)(a0/a1/a2/a3)
 FreeSpriteData(sp)(a2)
 SetRPAttrsA(rp,tags)(a0/a1)
 GetRPAttrsA(rp,tags)(a0/a1)
 BestModeIDA(tags)(a0)
+*--- functions in V40 or higher (Release 3.1) ---
+WriteChunkyPixels(rp,xstart,ystart,xstop,ystop,array,bytesperrow)(a0,d0/d1/d2/d3/a2,d4)
 ##end

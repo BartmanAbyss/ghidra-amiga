@@ -1,4 +1,3 @@
-* "dos.library"
 ##base _DOSBase
 ##bias 30
 ##public
@@ -37,7 +36,7 @@ WaitForChar(file,timeout)(d1/d2)
 ParentDir(lock)(d1)
 IsInteractive(file)(d1)
 Execute(string,file,file2)(d1/d2/d3)
-*--- functions in V36 or higher (distributed as Release 2.0) ---
+*--- functions in V36 or higher (Release 2.0) ---
 *	DOS Object creation/deletion
 AllocDosObject(type,tags)(d1/d2)
 FreeDosObject(type,ptr)(d1/d2)
@@ -74,7 +73,7 @@ ExamineFH(fh,fib)(d1/d2)
 SetFileDate(name,date)(d1/d2)
 NameFromLock(lock,buffer,len)(d1/d2/d3)
 NameFromFH(fh,buffer,len)(d1/d2/d3)
-SplitName(name,seperator,buf,oldpos,size)(d1/d2/d3/d4/d5)
+SplitName(name,separator,buf,oldpos,size)(d1/d2/d3/d4/d5)
 SameLock(lock1,lock2)(d1/d2)
 SetMode(fh,mode)(d1/d2)
 ExAll(lock,buffer,size,data,control)(d1/d2/d3/d4/d5)
@@ -146,8 +145,8 @@ FindSegment(name,seg,system)(d1/d2/d3)
 RemSegment(seg)(d1)
 *	Command Support
 CheckSignal(mask)(d1)
-ReadArgs(template,array,args)(d1/d2/d3)
-FindArg(keyword,template)(d1/d2)
+ReadArgs(arg_template,array,args)(d1/d2/d3)
+FindArg(keyword,arg_template)(d1/d2)
 ReadItem(name,maxchars,cSource)(d1/d2/d3)
 StrToLong(string,value)(d1/d2)
 MatchFirst(pat,anchor)(d1/d2)
@@ -156,7 +155,6 @@ MatchEnd(anchor)(d1)
 ParsePattern(pat,buf,buflen)(d1/d2/d3)
 MatchPattern(pat,str)(d1/d2)
 ##private
-* Not currently implemented.
 dosPrivate3()()
 ##public
 FreeArgs(args)(d1)
@@ -199,16 +197,12 @@ SameDevice(lock1,lock2)(d1/d2)
 ExAllEnd(lock,buffer,size,data,control)(d1/d2/d3/d4/d5)
 SetOwner(name,owner_info)(d1/d2)
 ##private
-* These were added in dos 36.147
 *--- (2 function slots reserved here) ---
 ##bias 1014
-* these were added in dos 37.1
 *--- (2 function slots reserved here) ---
 ##bias 1026
-* these were added in dos 37.8
 *--- (2 function slots reserved here) ---
 ##bias 1038
-* these were added in dos 39.11
 *--- (2 function slots reserved here) ---
 ##bias 1050
 ##end

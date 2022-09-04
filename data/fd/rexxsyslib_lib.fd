@@ -1,8 +1,6 @@
-* "rexxsyslib.library"
 ##base _RexxSysBase
 ##bias 30
-*--- functions in V33 or higher (distributed as Release 1.2) ---
-*
+*--- functions in V33 or higher (Release 1.2) ---
 ##private
 *--- (16 function slots reserved here) ---
 ##bias 126

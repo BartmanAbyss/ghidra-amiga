@@ -1,4 +1,3 @@
-* "Timer.Device"
 ##base _TimerBase
 ##bias 42
 ##public

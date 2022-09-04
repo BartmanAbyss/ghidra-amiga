@@ -1,4 +1,3 @@
-* "CiaA.Resource" and "CiaB.Resource"
 ##bias 6
 ##public
 AddICRVector(resource,iCRBit,interrupt)(a6,d0/a1)

@@ -1,9 +1,8 @@
-* "gadtools.library"
 ##base _GadToolsBase
 ##bias 30
 ##public
 *
-*--- functions in V36 or higher (distributed as Release 2.0) ---
+*--- functions in V36 or higher (Release 2.0) ---
 *
 * Gadget Functions
 *
@@ -38,9 +37,6 @@ DrawBevelBoxA(rport,left,top,width,height,taglist)(a0,d0/d1/d2/d3/a1)
 GetVisualInfoA(screen,taglist)(a0/a1)
 FreeVisualInfo(vi)(a0)
 ##private
-*
-* Reserved entries
-*
 gadtoolsPrivate1()()
 gadtoolsPrivate2()()
 gadtoolsPrivate3()()
@@ -49,7 +45,7 @@ gadtoolsPrivate5()()
 gadtoolsPrivate6()()
 ##public
 *
-*--- functions in V39 or higher (beta release for developers only) ---
+*--- functions in V39 or higher (Release 3) ---
 *
 GT_GetGadgetAttrsA(gad,win,req,taglist)(a0/a1/a2/a3)
 *

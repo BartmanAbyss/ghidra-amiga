@@ -1,8 +1,7 @@
-* "keymap.library"
 ##base _KeymapBase
 ##bias 30
 ##public
-*--- functions in V36 or higher (distributed as Release 2.0) ---
+*--- functions in V36 or higher (Release 2.0) ---
 SetKeyMapDefault(keyMap)(a0)
 AskKeyMapDefault()()
 MapRawKey(event,buffer,length,keyMap)(a0/a1,d1/a2)

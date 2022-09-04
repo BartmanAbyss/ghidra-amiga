@@ -1,10 +1,13 @@
-* "datatypes.library"
 ##base _DataTypesBase
 ##bias 30
 ##public
-*--- functions in V39 or higher (beta release for developers only) ---
+*--- functions in V40 or higher (Release 3.1) ---
+##private
+datatypesPrivate1()()
+##public
 *
-RLDispatch(rmsg,result)(a0/a1)
+* Public entries
+*
 ObtainDataTypeA(type,handle,attrs)(d0/a0/a1)
 ReleaseDataType(dt)(a0)
 NewDTObjectA(name,attrs)(d0/a0)
@@ -19,10 +22,12 @@ RemoveDTObject(win,o)(a0/a1)
 GetDTMethods(object)(a0)
 GetDTTriggerMethods(object)(a0)
 PrintDTObjectA(o,w,r,msg)(a0/a1/a2/a3)
-##private
-datatypesPrivate1()()
-datatypesPrivate2()()
-datatypesPrivate3()()
+ObtainDTDrawInfoA(o,attrs)(a0/a1)
+DrawDTObjectA(rp,o,x,y,w,h,th,tv,attrs)(a0/a1,d0/d1/d2/d3/d4/d5/a2)
+ReleaseDTDrawInfo(o,handle)(a0/a1)
 ##public
 GetDTString(id)(d0)
+* Just in case, make sure we reserve space for datatypes.library V45
+*--- (30 function slots reserved here) ---
+##bias 324
 ##end

@@ -1,4 +1,3 @@
-* "intuition.library"
 ##base _IntuitionBase
 ##bias 30
 ##public
@@ -76,13 +75,14 @@ RemakeDisplay()()
 RethinkDisplay()()
 *--- start of next next next next generation of names ----------------------
 AllocRemember(rememberKey,size,flags)(a0,d0/d1)
-* Public function AlohaWorkbench() is intentionally not documented
-AlohaWorkbench(wbport)(a0)
+##private
+intuitionPrivate1()()
+##public
 FreeRemember(rememberKey,reallyForget)(a0,d0)
 *--- start of 15 Nov 85 names ------------------------
 LockIBase(dontknow)(d0)
 UnlockIBase(ibLock)(a0)
-*--- functions in V33 or higher (distributed as Release 1.2) ---
+*--- functions in V33 or higher (Release 1.2) ---
 GetScreenData(buffer,size,type,screen)(a0,d0/d1/a1)
 RefreshGList(gadgets,window,requester,numGad)(a0/a1/a2,d0)
 AddGList(window,gadget,position,numGad,requester)(a0/a1,d0/d1/a2)
@@ -91,7 +91,7 @@ ActivateWindow(window)(a0)
 RefreshWindowFrame(window)(a0)
 ActivateGadget(gadgets,window,requester)(a0/a1/a2)
 NewModifyProp(gadget,window,requester,flags,horizPot,vertPot,horizBody,vertBody,numGad)(a0/a1/a2,d0/d1/d2/d3/d4/d5)
-*--- functions in V36 or higher (distributed as Release 2.0) ---
+*--- functions in V36 or higher (Release 2.0) ---
 QueryOverscan(displayID,rect,oScanType)(a0/a1,d0)
 MoveWindowInFrontOf(window,behindWindow)(a0/a1)
 ChangeWindowBox(window,left,top,width,height)(a0,d0/d1/d2/d3)
@@ -112,8 +112,7 @@ ObtainGIRPort(gInfo)(a0)
 ReleaseGIRPort(rp)(a0)
 GadgetMouse(gadget,gInfo,mousePoint)(a0/a1/a2)
 ##private
-* system private and not to be used by applications:
-intuitionPrivate1()()
+intuitionPrivate2()()
 ##public
 GetDefaultPubScreen(nameBuffer)(a0)
 EasyRequestArgs(window,easyStruct,idcmpPtr,args)(a0/a1/a2/a3)
@@ -140,7 +139,7 @@ SetGadgetAttrsA(gadget,window,requester,tagList)(a0/a1/a2/a3)
 *	for class implementors only
 NextObject(objectPtrPtr)(a0)
 ##private
-intuitionPrivate2()()
+intuitionPrivate3()()
 ##public
 MakeClass(classID,superClassID,superClassPtr,instanceSize,flags)(a0/a1/a2,d0/d1)
 AddClass(classPtr)(a0)
@@ -153,13 +152,12 @@ ResetMenuStrip(window,menu)(a0/a1)
 RemoveClass(classPtr)(a0)
 FreeClass(classPtr)(a0)
 ##private
-intuitionPrivate3()()
 intuitionPrivate4()()
-* Six spare vectors
+intuitionPrivate5()()
 *--- (6 function slots reserved here) ---
 ##bias 768
 ##public
-*--- functions in V39 or higher (beta release for developers only) ---
+*--- functions in V39 or higher (Release 3) ---
 AllocScreenBuffer(sc,bm,flags)(a0/a1,d0)
 FreeScreenBuffer(sc,sb)(a0/a1)
 ChangeScreenBuffer(sc,sb)(a0/a1)

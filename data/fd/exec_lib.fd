@@ -1,4 +1,3 @@
-* "exec.library"
 ##base _SysBase
 ##bias 30
 ##public
@@ -108,7 +107,7 @@ TypeOfMem(address)(a1)
 Procure(sigSem,bidMsg)(a0/a1)
 Vacate(sigSem,bidMsg)(a0/a1)
 OpenLibrary(libName,version)(a1,d0)
-*--- functions in V33 or higher (distributed as Release 1.2) ---
+*--- functions in V33 or higher (Release 1.2) ---
 *------ signal semaphores (note funny registers)----------------------
 InitSemaphore(sigSem)(a0)
 ObtainSemaphore(sigSem)(a0)
@@ -116,7 +115,7 @@ ReleaseSemaphore(sigSem)(a0)
 AttemptSemaphore(sigSem)(a0)
 ObtainSemaphoreList(sigSem)(a0)
 ReleaseSemaphoreList(sigSem)(a0)
-FindSemaphore(sigSem)(a1)
+FindSemaphore(name)(a1)
 AddSemaphore(sigSem)(a1)
 RemSemaphore(sigSem)(a1)
 *------ kickmem support ----------------------------------------------
@@ -126,7 +125,7 @@ AddMemList(size,attributes,pri,base,name)(d0/d1/d2/a0/a1)
 CopyMem(source,dest,size)(a0/a1,d0)
 CopyMemQuick(source,dest,size)(a0/a1,d0)
 *------ cache --------------------------------------------------------
-*--- functions in V36 or higher (distributed as Release 2.0) ---
+*--- functions in V36 or higher (Release 2.0) ---
 CacheClearU()()
 CacheClearE(address,length,caches)(a0,d0/d1)
 CacheControl(cacheBits,cacheMask)(d0/d1)
@@ -148,25 +147,50 @@ FreePooled(poolHeader,memory,memSize)(a0/a1,d0)
 AttemptSemaphoreShared(sigSem)(a0)
 ColdReboot()()
 StackSwap(newStack)(a0)
-*------ task trees ---------------------------------------------------
-ChildFree(tid)(d0)
-ChildOrphan(tid)(d0)
-ChildStatus(tid)(d0)
-ChildWait(tid)(d0)
-*------ future expansion ---------------------------------------------
-CachePreDMA(address,length,flags)(a0/a1,d1)
-CachePostDMA(address,length,flags)(a0/a1,d1)
-*------ New, for V39
-*--- functions in V39 or higher (beta release for developers only) ---
-*------ Low memory handler functions
-AddMemHandler(memhand)(a1)
-RemMemHandler(memhand)(a1)
 ##private
 execPrivate10()()
 execPrivate11()()
 execPrivate12()()
 execPrivate13()()
-* For ROM Space, a tagged OpenLibrary
-execPrivate14()()
 ##public
+*------ future expansion ---------------------------------------------
+CachePreDMA(address,length,flags)(a0/a1,d0)
+CachePostDMA(address,length,flags)(a0/a1,d0)
+*------ New, for V39
+*--- functions in V39 or higher (Release 3) ---
+*------ Low memory handler functions
+AddMemHandler(memhand)(a1)
+RemMemHandler(memhand)(a1)
+*------ Function to attempt to obtain a Quick Interrupt Vector...
+ObtainQuickVector(interruptCode)(a0)
+##private
+execPrivate14()()
+execPrivate15()()
+execPrivate16()()
+execPrivate17()()
+execPrivate18()()
+execPrivate19()()
+##public
+*--- functions in V45 or higher ---
+*------ Finally the list functions are complete
+NewMinList(minlist)(a0)
+##private
+execPrivate20()()
+execPrivate21()()
+execPrivate22()()
+##public
+*------ New AVL tree support for V45. Yes, this is intentionally part of Exec!
+AVL_AddNode(root,node,func)(a0/a1/a2)
+AVL_RemNodeByAddress(root,node)(a0/a1)
+AVL_RemNodeByKey(root,key,func)(a0/a1/a2)
+AVL_FindNode(root,key,func)(a0/a1/a2)
+AVL_FindPrevNodeByAddress(node)(a0)
+AVL_FindPrevNodeByKey(root,key,func)(a0/a1/a2)
+AVL_FindNextNodeByAddress(node)(a0)
+AVL_FindNextNodeByKey(root,key,func)(a0/a1/a2)
+AVL_FindFirstNode(root)(a0)
+AVL_FindLastNode(root)(a0)
+##private
+*--- (10 function slots reserved here) ---
+##bias 972
 ##end
