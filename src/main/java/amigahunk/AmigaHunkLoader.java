@@ -35,6 +35,7 @@ import ghidra.app.util.Option;
 import ghidra.app.util.OptionException;
 import ghidra.app.util.bin.BinaryReader;
 import ghidra.app.util.bin.ByteProvider;
+import ghidra.app.util.bin.ByteProviderInputStream;
 import ghidra.app.util.importer.MessageLog;
 import ghidra.app.util.opinion.AbstractLibrarySupportLoader;
 import ghidra.app.util.opinion.LoadSpec;
@@ -43,8 +44,6 @@ import ghidra.framework.model.DomainObject;
 import ghidra.program.flatapi.FlatProgramAPI;
 import ghidra.program.model.address.Address;
 import ghidra.program.model.address.AddressOutOfBoundsException;
-import ghidra.program.model.data.ArrayDataType;
-import ghidra.program.model.data.ByteDataType;
 import ghidra.program.model.data.DWordDataType;
 import ghidra.program.model.data.DataType;
 import ghidra.program.model.data.DataTypeConflictHandler;
@@ -95,7 +94,6 @@ import structs.WBArg;
 import structs.WBStartup;
 
 public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
-
 	static final String AMIGA_HUNK = "Amiga Executable Hunks loader";
 	public static final int DEF_IMAGE_BASE = 0x21F000;
 
@@ -113,7 +111,6 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 
 	@Override
 	public String getName() {
-
 		return AMIGA_HUNK;
 	}
 	
@@ -124,9 +121,14 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 	@Override
 	public Collection<LoadSpec> findSupportedLoadSpecs(ByteProvider provider) {
 		List<LoadSpec> loadSpecs = new ArrayList<>();
+		var langComp = new LanguageCompilerSpecPair("68000:BE:32:default", "default");
 
-		if (HunkBlockFile.isHunkBlockFile(new BinaryReader(provider, false))) {
-			loadSpecs.add(new LoadSpec(this, 0, new LanguageCompilerSpecPair("68000:BE:32:default", "default"), true));
+		try {
+			if(HunkBlockFile.isHunkBlockFile(new BinaryReader(provider, false)))
+				loadSpecs.add(new LoadSpec(this, 0, langComp, true));
+			else if(provider.readByte(0) == 0x11 && provider.readByte(1) == 0x11)
+				loadSpecs.add(new LoadSpec(this, 0x100_0000 - provider.length(), langComp, true));
+		} catch(Exception e) {
 		}
 
 		return loadSpecs;
@@ -141,26 +143,48 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 		Memory mem = program.getMemory();
 
 		BinaryReader reader = new BinaryReader(provider, false);
-		HunkBlockType type = HunkBlockFile.peekType(reader);
-		HunkBlockFile hbf = new HunkBlockFile(reader, type == HunkBlockType.TYPE_LOADSEG);
-		
-		switch (type) {
-		case TYPE_LOADSEG: 
-		case TYPE_UNIT: {
+
+		// executable
+		if(loadSpec.getDesiredImageBase() == 0) {
+			HunkBlockType type = HunkBlockFile.peekType(reader);
+			HunkBlockFile hbf = new HunkBlockFile(reader, type == HunkBlockType.TYPE_LOADSEG);
+			switch (type) {
+			case TYPE_LOADSEG: 
+			case TYPE_UNIT:
+				try {
+					loadExecutable(imageBase, type == HunkBlockType.TYPE_LOADSEG, hbf, fpa, monitor, mem, log);
+				} catch (Throwable e) {
+					e.printStackTrace();
+					log.appendException(e);
+				}
+			break;
+			case TYPE_LIB:
+			break;
+			default:
+			break;
+			}
+		} else {
 			try {
-				loadExecutable(imageBase, type == HunkBlockType.TYPE_LOADSEG, hbf, fpa, monitor, mem, log);
+				loadKickstart(provider, loadSpec.getDesiredImageBase(), fpa, monitor, mem, log);
 			} catch (Throwable e) {
 				e.printStackTrace();
 				log.appendException(e);
 			}
-		} break;
-		case TYPE_LIB: {
-			
-		} break;
-		default: {
-			
-		} break;
+
 		}
+	}
+
+	private static void loadKickstart(ByteProvider provider, long imageBase, FlatProgramAPI fpa, TaskMonitor monitor, Memory mem, MessageLog log) throws Throwable {
+		var block = createSegment(new ByteProviderInputStream(provider), fpa, "ROM", imageBase, provider.length(), false, true, log);
+		var startAddr = block.getStart().add(2);
+
+		createCustomSegment(fpa, log);
+
+		analyzeResident(mem, fpa, startAddr, log);
+		
+		addCustomTypes(fpa.getCurrentProgram(), monitor, log);
+		
+		setFunction(fpa, startAddr, "start", log);
 	}
 
 	private static void loadExecutable(Address imageBase, boolean isExecutable, HunkBlockFile hbf, FlatProgramAPI fpa, TaskMonitor monitor, Memory mem, MessageLog log) throws Throwable {
@@ -221,14 +245,14 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 		
 		addCustomTypes(fpa.getCurrentProgram(), monitor, log);
 		
-		if (isExecutable) {
+		if(isExecutable)
 			setFunction(fpa, startAddr, "start", log);
-		}
 		
 		addSymbols(bi.getSegments(), fpa.getCurrentProgram().getSymbolTable(), addrs, fpa);
 	}
 	
 	private static void createCustomSegment(FlatProgramAPI fpa, MessageLog log) {
+		// TODO: CIA
 		log.appendMsg("Creating custom chips memory block");
 		var block = createSegment(null, fpa, "Custom", 0xdff000, 0x200, true, false, log);
 		var program = fpa.getCurrentProgram();
@@ -449,6 +473,7 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 	private static void analyzeResident(Memory mem, FlatProgramAPI fpa, Address startAddr, MessageLog log) {
 		Program program = fpa.getCurrentProgram();
 		ReferenceManager refMgr = program.getReferenceManager();
+		var funcsList = new FdFunctionsInLibs();
 
 		try {
 			while (true) {
@@ -469,6 +494,12 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 						ClearDataMode.CLEAR_ALL_UNDEFINED_CONFLICT_DATA);
 
 				byte rt_Flags = mem.getByte(addr.add(10));
+
+				var NameAddr = addr.getNewAddress(mem.getInt(addr.add(14), true));
+				var builder = new StringBuilder();
+				for(int i = 0; mem.getByte(NameAddr.add(i)) != 0 && mem.getByte(NameAddr.add(i)) != 0xd && mem.getByte(NameAddr.add(i)) != 0xa; i++)
+					builder.append(Character.toChars(mem.getByte(NameAddr.add(i))));
+				var rt_Name = builder.toString();
 
 				if ((rt_Flags & RTF_AUTOINIT) == RTF_AUTOINIT) {
 					long rt_Init = mem.getInt(addr.add(22));
@@ -497,13 +528,11 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 					params.add(new ParameterImpl("seglist", PointerDataType.dataType, program.getRegister("A0"), program));
 					params.add(new ParameterImpl("lib", new PointerDataType(baseStruct), program.getRegister("D0"), program));
 
-					func.updateFunction(null, null, FunctionUpdateType.CUSTOM_STORAGE, true, SourceType.ANALYSIS,
-							params.toArray(ParameterImpl[]::new));
+					func.updateFunction(null, null, FunctionUpdateType.CUSTOM_STORAGE, true, SourceType.ANALYSIS, params.toArray(ParameterImpl[]::new));
 
 					if (it_DataInit != 0) {
 						Address it_DataInitAddr = fpa.toAddr(it_DataInit);
-						program.getSymbolTable().createLabel(it_DataInitAddr,
-								String.format("it_DataInit_%06X", addr.getOffset()), SourceType.ANALYSIS);
+						program.getSymbolTable().createLabel(it_DataInitAddr, String.format("it_DataInit_%06X", addr.getOffset()), SourceType.ANALYSIS);
 
 						while (true) {
 							InitData_Type tt;
@@ -518,8 +547,7 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 						}
 					}
 					Address it_FuncTableAddr = fpa.toAddr(it_FuncTable);
-					program.getSymbolTable().createLabel(it_FuncTableAddr,
-							String.format("it_FuncTable_%06X", addr.getOffset()), SourceType.ANALYSIS);
+					program.getSymbolTable().createLabel(it_FuncTableAddr, String.format("it_FuncTable_%06X", addr.getOffset()), SourceType.ANALYSIS);
 
 					int i = 0;
 					boolean askedForFd = false;
@@ -547,10 +575,14 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 							break;
 						}
 
-						if (!askedForFd && i >= 4) {
+						var libName = rt_Name.replace('.', '_');;
+						if(funcsList.findLibIndex(libName) != -1)
+							funcTable = funcsList.getFunctionTableByLib(libName);
+
+						if(funcTable == null && !askedForFd && i >= 4) {
 							TimeUnit.SECONDS.sleep(1);
 							if (OptionDialog.YES_OPTION == OptionDialog.showYesNoDialogWithNoAsDefaultButton(null,
-									"Question", "Do you have *.sfd file for this library?")) {
+									"Question", String.format("Do you have %s.sfd file for this library?", rt_Name))) {
 								String fdPath = showSelectFile("Select file...");
 								funcTable = FdParser.readSfdFile(fdPath);
 							}
@@ -608,7 +640,7 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 								SourceType.ANALYSIS, params.toArray(ParameterImpl[]::new));
 						i++;
 					}
-				}
+				} // autoinit
 			}
 		} catch (InvalidInputException | MemoryAccessException | AddressOutOfBoundsException
 				| CodeUnitInsertionException | DuplicateNameException | IOException | InterruptedException e) {

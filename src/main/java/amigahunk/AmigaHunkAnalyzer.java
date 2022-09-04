@@ -132,7 +132,7 @@ public class AmigaHunkAnalyzer extends AbstractAnalyzer {
 		FlatProgramAPI fpa = new FlatProgramAPI(program);
 		
 		try {
-			for (String lib : funcsList.getLibsList(filter)) {
+			for(String lib : funcsList.getLibsList(filter)) {
 				createFunctionsSegment(fpa, lib, funcsList.getFunctionTableByLib(lib), log);
 			}
 		} catch (InvalidInputException | DuplicateNameException | CodeUnitInsertionException e) {

@@ -45,7 +45,7 @@ public class FdFunction {
 	}
 
 	public final String getName(boolean withLib) {
-		return (withLib ? lib.replace("_lib.fd", "") + LIB_SPLITTER : "") + name;
+		return (withLib ? lib + LIB_SPLITTER : "") + name;
 	}
 
 	public final String getReturnType() {
