@@ -43,7 +43,10 @@ import ghidra.framework.model.DomainObject;
 import ghidra.program.flatapi.FlatProgramAPI;
 import ghidra.program.model.address.Address;
 import ghidra.program.model.address.AddressOutOfBoundsException;
+import ghidra.program.model.data.ArrayDataType;
+import ghidra.program.model.data.ByteDataType;
 import ghidra.program.model.data.DWordDataType;
+import ghidra.program.model.data.DataType;
 import ghidra.program.model.data.DataTypeConflictHandler;
 import ghidra.program.model.data.DataUtilities;
 import ghidra.program.model.data.DataUtilities.ClearDataMode;
@@ -81,6 +84,7 @@ import hunk.Segment;
 import hunk.SegmentType;
 import hunk.XDefinition;
 import hunk.XReference;
+import structs.Custom;
 import structs.ExecLibrary;
 import structs.InitData_Type;
 import structs.InitTable;
@@ -211,6 +215,8 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 		
 		createBaseSegment(fpa, log);
 
+		createCustomSegment(fpa, log);
+
 		analyzeResident(mem, fpa, startAddr, log);
 		
 		addCustomTypes(fpa.getCurrentProgram(), monitor, log);
@@ -222,6 +228,19 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 		addSymbols(bi.getSegments(), fpa.getCurrentProgram().getSymbolTable(), addrs, fpa);
 	}
 	
+	private static void createCustomSegment(FlatProgramAPI fpa, MessageLog log) {
+		log.appendMsg("Creating custom chips memory block");
+		var block = createSegment(null, fpa, "Custom", 0xdff000, 0x200, true, false, log);
+		var program = fpa.getCurrentProgram();
+		try {
+			DataType regs = program.getDataTypeManager().addDataType(new Custom().toDataType(), DataTypeConflictHandler.DEFAULT_HANDLER);
+			DataUtilities.createData(program, block.getStart(), regs, -1, false, ClearDataMode.CLEAR_ALL_UNDEFINED_CONFLICT_DATA);
+			fpa.createLabel(block.getStart(), "Custom", false);
+		} catch (Exception e) {
+			log.appendException(e);
+		}
+	}
+
 	private static void addSymbols(Segment segs[], SymbolTable st, int addrs[], FlatProgramAPI fpa) throws Throwable {
 		for (Segment seg : segs) {
 			hunk.Symbol[] symbols = seg.getSymbols(seg);
@@ -635,8 +654,7 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 		}
 	}
 
-	public static MemoryBlock createSegment(InputStream stream, FlatProgramAPI fpa, String name, long address,
-			long size, boolean write, boolean execute, MessageLog log) {
+	public static MemoryBlock createSegment(InputStream stream, FlatProgramAPI fpa, String name, long address, long size, boolean write, boolean execute, MessageLog log) {
 		MemoryBlock block;
 		try {
 			Program program = fpa.getCurrentProgram();

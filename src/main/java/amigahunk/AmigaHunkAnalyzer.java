@@ -273,7 +273,7 @@ public class AmigaHunkAnalyzer extends AbstractAnalyzer {
 				params.add(new ParameterImpl(arg.name, dataType, program.getRegister(arg.reg), program));
 			}
 
-			var retType = func.getReturnType();
+			var retType = func.getReturnType(); // TODO: VOID use something else, currently shows up as 'undefined' in D0b
 			var returnValue = retType.equals("VOID") ? null : new ReturnParameterImpl(getAmigaDataType(retType, program), program.getRegister("D0"), program);
 			function.updateFunction(null, returnValue, FunctionUpdateType.CUSTOM_STORAGE, true, SourceType.ANALYSIS, params.toArray(ParameterImpl[]::new));
 			DataUtilities.createData(program, funcAddress, new ArrayDataType(ByteDataType.dataType, 6, -1), -1, false, ClearDataMode.CLEAR_ALL_UNDEFINED_CONFLICT_DATA);
