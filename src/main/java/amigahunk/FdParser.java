@@ -118,7 +118,7 @@ public class FdParser {
 					
 					if (!arg[0].isEmpty()) {
 						for (int i = 0; i < arg.length; ++i) {
-							func.addArg(arg[i], reg[i].toUpperCase());
+							func.addArg(arg[i], null, reg[i].toUpperCase());
 						}
 					}
 					

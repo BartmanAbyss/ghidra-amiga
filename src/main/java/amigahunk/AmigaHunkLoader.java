@@ -22,7 +22,6 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.JFileChooser;
@@ -580,10 +579,8 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 						params.add(new ParameterImpl("base", new PointerDataType(baseStruct), program.getRegister("A6"), program));
 
 						if (funcDef != null) {
-							Map<String, String> args = funcDef.getArgs();
-							for (Entry<String, String> arg : args.entrySet()) {
-								params.add(new ParameterImpl(arg.getKey(), PointerDataType.dataType,
-										program.getRegister(arg.getValue()), program));
+							for (var arg : funcDef.getArgs()) {
+								params.add(new ParameterImpl(arg.name, PointerDataType.dataType, program.getRegister(arg.reg), program));
 							}
 						}
 

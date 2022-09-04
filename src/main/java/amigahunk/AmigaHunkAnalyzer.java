@@ -17,8 +17,6 @@ package amigahunk;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import ghidra.app.plugin.core.analysis.ConstantPropagationContextEvaluator;
 import ghidra.app.services.AbstractAnalyzer;
@@ -194,9 +192,9 @@ public class AmigaHunkAnalyzer extends AbstractAnalyzer {
 
 			Program program = fpa.getCurrentProgram();
 
-			Map<String, String> args = func.getArgs();
-			for (Entry<String, String> arg : args.entrySet()) {
-				params.add(new ParameterImpl(arg.getKey(), PointerDataType.dataType, program.getRegister(arg.getValue()), program));
+			var args = func.getArgs();
+			for (var arg : args) {
+				params.add(new ParameterImpl(arg.name, PointerDataType.dataType, program.getRegister(arg.reg), program));
 			}
 
 			function.updateFunction(null, null, FunctionUpdateType.CUSTOM_STORAGE, true,
