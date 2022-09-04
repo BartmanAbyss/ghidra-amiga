@@ -3,17 +3,19 @@ package amigahunk;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.io.File;
+
 import org.junit.Test;
 
 public class FdParserTest {
 	@Test
-	public void testFd() {
+	public void testExecFd() {
 		var funcTable = FdParser.readFdFile("data/fd/exec_lib.fd");
 		assertEquals(147, funcTable.getFunctions().length);
 	}
 
 	@Test
-	public void testSfd() {
+	public void testExecSfd() {
 		var funcTable = FdParser.readSfdFile("data/sfd/exec_lib.sfd");
 		assertEquals(125, funcTable.getFunctions().length);
 		var func = funcTable.getFunctionByName("AVL_FindNextNodeByKey");
@@ -33,5 +35,14 @@ public class FdParserTest {
 		assertEquals("func", func.getArgs().get(2).name);
 		assertEquals("APTR", func.getArgs().get(2).type);
 		assertEquals("a2", func.getArgs().get(2).reg);
+	}
+
+	@Test
+	public void testAllSfd() {
+		File dir = new File("data/sfd");
+		for(var entry : dir.listFiles()) {
+			var funcTable = FdParser.readSfdFile(entry.getPath());
+			assertNotNull(entry.getPath(), funcTable);
+		}
 	}
 }

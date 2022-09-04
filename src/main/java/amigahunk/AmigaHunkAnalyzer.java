@@ -92,7 +92,7 @@ public class AmigaHunkAnalyzer extends AbstractAnalyzer {
 		String[] libsList = funcsList.getLibsList(null);
 		for (String lib : libsList) {
 			boolean defaultValue = filter.contains(lib);
-			options.registerOption(lib.replace(FdParser.LIB_FD_EXT, "").toUpperCase(), defaultValue, null, String.format("Analyze calls from %s", lib));
+			options.registerOption(lib, defaultValue, null, String.format("Analyze calls from %s", lib));
 		}
 	}
 	
@@ -108,7 +108,7 @@ public class AmigaHunkAnalyzer extends AbstractAnalyzer {
 		
 		String[] libsList = funcsList.getLibsList(filter);
 		for (String lib : libsList) {
-			if (options.getBoolean(lib.replace(FdParser.LIB_FD_EXT, "").toUpperCase(), false)) {
+			if (options.getBoolean(lib, false)) {
 				filter.add(lib);
 			}
 		}

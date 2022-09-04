@@ -14,9 +14,8 @@ import org.apache.commons.lang3.StringUtils;
 import ghidra.framework.Application;
 
 public class FdParser {
-	public static final String LIB_FD_EXT = "_lib.fd";
-	public static final String EXEC_LIB = "exec" + LIB_FD_EXT;
-	public static final String DOS_LIB = "dos" + LIB_FD_EXT;
+	public static final String EXEC_LIB = "exec_library";
+	public static final String DOS_LIB = "dos_library";
 	private static final Pattern FUNC_PAT = Pattern.compile("([A-Za-z][_A-Za-z00-9]+)\\((.*?)\\)(?:\\((.*?)\\))?");
 
 	public static FdLibFunctions readFdFile(String libName) {
@@ -170,21 +169,24 @@ public class FdParser {
 		reader.close();
 
 		int offset = 0;
+		boolean isAlias = false, isVarargs = false;
 		for(var line : lines) {
 			if(line.startsWith("==")) {
 				if(line.startsWith("libname", 2))
-					libname = line.substring(2 + "libname".length() + 1);
+					libname = line.substring(2 + "libname".length() + 1).replace('.', '_');
 				if(line.startsWith("bias", 2))
 					offset = -Integer.parseInt(line.substring(2 + "bias".length() + 1));
 				else if(line.startsWith("reserve", 2))
 					offset -= Integer.parseInt(line.substring(2 + "reserve".length() + 1)) * 6;
 				else if(line.startsWith("varargs", 2))
-					offset += 6;
+					isVarargs = true;
 				else if(line.startsWith("alias", 2))
-					offset += 6;
+					isAlias = true;
 				else if(line.startsWith("end", 2))
 					break;
 			} else {
+				if(isAlias)
+					offset += 6;
 				if(funcTable == null)
 					funcTable = new FdLibFunctions(libname);
 				var paren_arg = line.indexOf('(');
@@ -245,10 +247,13 @@ public class FdParser {
 					}
 					if(line.charAt(p_arg) == ' ') p_arg++;
 				}
-				funcTable.addFunction(func);
-				System.out.format("%s returns '%s' = -$%x\n", func.getName(false), func.getReturnType(), Math.abs(func.getBias()));
-				for(var arg : func.getArgs())
-					System.out.format("\t'%s' '%s' (%s)\n", arg.name, arg.type, arg.reg);
+				//System.out.format("%s returns '%s' = -$%x\n", func.getName(false), func.getReturnType(), Math.abs(func.getBias()));
+				//for(var arg : func.getArgs())
+				//	System.out.format("\t'%s' '%s' (%s)\n", arg.name, arg.type, arg.reg);
+				if(!isAlias)
+					funcTable.addFunction(func);
+				isVarargs = false;
+				isAlias = false;
 				offset -= 6;
 			}
 		}

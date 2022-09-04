@@ -530,9 +530,9 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 						if (!askedForFd && i >= 4) {
 							TimeUnit.SECONDS.sleep(1);
 							if (OptionDialog.YES_OPTION == OptionDialog.showYesNoDialogWithNoAsDefaultButton(null,
-									"Question", String.format("Do you have *%s file for this library?", FdParser.LIB_FD_EXT))) {
+									"Question", "Do you have *.sfd file for this library?")) {
 								String fdPath = showSelectFile("Select file...");
-								funcTable = FdParser.readFdFile(fdPath);
+								funcTable = FdParser.readSfdFile(fdPath);
 							}
 							askedForFd = true;
 						}

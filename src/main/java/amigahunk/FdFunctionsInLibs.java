@@ -21,20 +21,16 @@ public class FdFunctionsInLibs {
 		libFuncs = new ArrayList<>();
 		
 		try {
-			File dir = Application.getModuleDataSubDirectory("fd").getFile(false);
+			File dir = Application.getModuleDataSubDirectory("sfd").getFile(false);
 			
 			for (final File entry : dir.listFiles()) {
-				String fname = entry.getName().toLowerCase();
-				libsList.add(fname);
-				FdLibFunctions fd = FdParser.readFdFile(fname);
-				
-				libFuncs.add(new AbstractMap.SimpleEntry<String, FdLibFunctions>(fname, fd));
-				
-				if (fd == null) {
-					continue;
+				FdLibFunctions fd = FdParser.readSfdFile(entry.getName());
+				if(fd != null) {
+					var lname = fd.getBaseName().toLowerCase();
+					libsList.add(lname);
+					libFuncs.add(new AbstractMap.SimpleEntry<String, FdLibFunctions>(lname, fd));
+					funcsList.addAll(Arrays.asList(fd.getFunctions()));
 				}
-				
-				funcsList.addAll(Arrays.asList(fd.getFunctions()));
 		    }
 		} catch (IOException e) {
 			e.printStackTrace();

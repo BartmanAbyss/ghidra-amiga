@@ -1,0 +1,31 @@
+{
+	// Use IntelliSense to learn about possible attributes.
+	// Hover to view descriptions of existing attributes.
+	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "java",
+			"name": "Attach",
+			"request": "attach",
+			"preLaunchTask": "ghidraDebug",
+			"hostName": "localhost",
+			"port": "18001"
+		},
+		
+		{ // not working correctly (doesn't fid module directory for extension)
+			"type": "java",
+			"name": "Ghidra Debug",
+			"projectName": "ghidra-amiga",
+			"request": "launch",
+			"mainClass": "ghidra.Ghidra",
+			"args": "ghidra.GhidraRun",
+			"shortenCommandLine": "argfile",
+			"vmArgs": "-XX:+IgnoreUnrecognizedVMOptions -XX:+ShowCodeDetailsInExceptionMessages -Djava.system.class.loader=ghidra.GhidraClassLoader -Dfile.encoding=UTF8 -Duser.country=US -Duser.language=en -Duser.variant= -Dsun.java2d.opengl=false -Djdk.tls.client.protocols=TLSv1.2,TLSv1.3 -Dcpu.core.limit= -Dcpu.core.override= -Dfont.size.override= -Dpython.console.encoding=UTF-8 -Xshare:off --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.desktop/sun.awt.image=ALL-UNNAMED -Dsun.java2d.d3d=false -Dlog4j.skipJansi=true -cp ${GHIDRA_INSTALL_DIR}/Ghidra/Framework/Utility/lib/Utility.jar -Dvisualvm.display.name=Ghidra -Dghidra.test.property.timeout.disable=true",
+			"classPaths": ["$Auto", "${env:GHIDRA_INSTALL_DIR}/Ghidra/Extensions/ghidra-amiga/lib/ghidra-amiga.jar"],
+			"modulePaths": ["$Auto", "${env:GHIDRA_INSTALL_DIR}/Ghidra/Extensions/ghidra-amiga/lib/ghidra-amiga.jar"],
+			"console": "internalConsole"
+		}
+	]
+}
+

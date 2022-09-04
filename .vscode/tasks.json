@@ -1,0 +1,49 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "gradle",
+			"id": "gradle_install",
+			"script": "install",
+			"description": "",
+			"group": "other",
+			"project": "ghidra-amiga",
+			"buildFile": "build.gradle",
+			"rootProject": "ghidra-amiga",
+			"projectFolder": "${workspaceRoot}",
+			"workspaceFolder": "${workspaceRoot}",
+			"args": "",
+			"javaDebug": false,
+			"problemMatcher": [
+				"$gradle"
+			],
+			"label": "gradle: install"
+		},
+		{
+			"type": "gradle",
+			"id": "gradle_buildExtension",
+			"script": "buildExtension",
+			"description": "",
+			"group": "other",
+			"project": "ghidra-amiga",
+			"buildFile": "build.gradle",
+			"rootProject": "ghidra-amiga",
+			"projectFolder": "${workspaceRoot}",
+			"workspaceFolder": "${workspaceRoot}",
+			"args": "",
+			"javaDebug": false,
+			"problemMatcher": [
+				"$gradle"
+			],
+			"label": "gradle: buildExtension"
+		},
+		{ // not optimal (opens new terminal window everytime, doesn't close on debug end)
+			"label": "ghidraDebug",
+            "type": "shell",
+            "command": "start ${env:GHIDRA_INSTALL_DIR}/support/ghidraDebug.bat",
+			"dependsOn": [
+				"gradle: install"
+			]
+		}
+	]
+}

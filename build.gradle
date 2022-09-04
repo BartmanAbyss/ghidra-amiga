@@ -73,6 +73,7 @@ buildExtension {
 	exclude '.vscode'
 	exclude 'gradle*'
 	exclude '.editorconfig'
+	exclude 'java-formatter.xml'
 }
 
 task install(type: Copy) {
