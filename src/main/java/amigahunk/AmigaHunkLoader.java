@@ -21,7 +21,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.JFileChooser;
@@ -128,7 +130,6 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 
 	@Override
 	protected void load(ByteProvider provider, LoadSpec loadSpec, List<Option> options, Program program, TaskMonitor monitor, MessageLog log) throws IOException {
-
 		refsLastIndex = 0;
 		defsLastIndex = 0;
 		
@@ -143,7 +144,7 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 		case TYPE_LOADSEG: 
 		case TYPE_UNIT: {
 			try {
-				loadExecutable(imageBase, type == HunkBlockType.TYPE_LOADSEG, hbf, fpa, mem, log);
+				loadExecutable(imageBase, type == HunkBlockType.TYPE_LOADSEG, hbf, fpa, monitor, mem, log);
 			} catch (Throwable e) {
 				e.printStackTrace();
 				log.appendException(e);
@@ -158,7 +159,7 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 		}
 	}
 
-	private static void loadExecutable(Address imageBase, boolean isExecutable, HunkBlockFile hbf, FlatProgramAPI fpa, Memory mem, MessageLog log) throws Throwable {
+	private static void loadExecutable(Address imageBase, boolean isExecutable, HunkBlockFile hbf, FlatProgramAPI fpa, TaskMonitor monitor, Memory mem, MessageLog log) throws Throwable {
 		BinImage bi = BinFmtHunk.loadImage(hbf, log);
 		
 		if (bi == null) {
@@ -212,7 +213,7 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 
 		analyzeResident(mem, fpa, startAddr, log);
 		
-		addCustomTypes(fpa.getCurrentProgram(), log);
+		addCustomTypes(fpa.getCurrentProgram(), monitor, log);
 		
 		if (isExecutable) {
 			setFunction(fpa, startAddr, "start", log);
@@ -234,7 +235,7 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 		}
 	}
 
-	private static void addCustomTypes(Program program, MessageLog log) {
+	private static void addCustomTypes(Program program, TaskMonitor monitor, MessageLog log) {
 		try {
 			program.getDataTypeManager().addDataType((new Message()).toDataType(), DataTypeConflictHandler.DEFAULT_HANDLER);
 			program.getDataTypeManager().addDataType((new WBArg()).toDataType(), DataTypeConflictHandler.DEFAULT_HANDLER);

@@ -28,15 +28,26 @@ import ghidra.program.model.address.Address;
 import ghidra.program.model.address.AddressSetView;
 import ghidra.program.model.data.ArrayDataType;
 import ghidra.program.model.data.ByteDataType;
+import ghidra.program.model.data.DataType;
 import ghidra.program.model.data.DataUtilities;
+import ghidra.program.model.data.FunctionDefinitionDataType;
+import ghidra.program.model.data.IntegerDataType;
 import ghidra.program.model.data.DataUtilities.ClearDataMode;
 import ghidra.program.model.data.PointerDataType;
+import ghidra.program.model.data.SignedCharDataType;
+import ghidra.program.model.data.SignedWordDataType;
+import ghidra.program.model.data.TerminatedStringDataType;
+import ghidra.program.model.data.TypedefDataType;
+import ghidra.program.model.data.UnsignedIntegerDataType;
+import ghidra.program.model.data.VoidDataType;
+import ghidra.program.model.data.WordDataType;
 import ghidra.program.model.lang.Register;
 import ghidra.program.model.listing.Function;
 import ghidra.program.model.listing.FunctionIterator;
 import ghidra.program.model.listing.Instruction;
 import ghidra.program.model.listing.ParameterImpl;
 import ghidra.program.model.listing.Program;
+import ghidra.program.model.listing.ReturnParameterImpl;
 import ghidra.program.model.listing.Function.FunctionUpdateType;
 import ghidra.program.model.mem.MemoryBlock;
 import ghidra.program.model.scalar.Scalar;
@@ -156,6 +167,70 @@ public class AmigaHunkAnalyzer extends AbstractAnalyzer {
 		return true;
 	}
 	
+	private static DataType getAmigaDataType(String type, Program program) {
+		DataType dataType = PointerDataType.dataType;
+		type = type.replace("struct ", "");
+		type = type.replace("const ", "");
+		type = type.replace("CONST ", "");
+		type = type.replace("volatile ", "");
+		type = type.replace("VOLATILE ", "");
+		if(type.contains("("))
+			return new PointerDataType(new FunctionDefinitionDataType("FUNC")); // TODO: correct function pointer type
+		for(var word : type.split(" ")) {
+			if(word.equals("*")) {
+				dataType = new PointerDataType(dataType);
+			} else {
+				if(word.equals("VOID"))
+					dataType = new TypedefDataType("VOID", VoidDataType.dataType);
+				else if(word.equals("APTR"))
+					dataType = new TypedefDataType("APTR", new PointerDataType(VoidDataType.dataType));
+				else if(word.equals("BPTR"))
+					dataType = new TypedefDataType("BPTR", UnsignedIntegerDataType.dataType);
+				else if(word.equals("BSTR"))
+					dataType = new TypedefDataType("BSTR", UnsignedIntegerDataType.dataType);
+				else if(word.equals("LONG"))
+					dataType = new TypedefDataType("LONG", IntegerDataType.dataType);
+				else if(word.equals("ULONG"))
+					dataType = new TypedefDataType("ULONG", UnsignedIntegerDataType.dataType);
+				else if(word.equals("LONGBITS"))
+					dataType = new TypedefDataType("LONGBITS", UnsignedIntegerDataType.dataType);
+				else if(word.equals("WORD"))
+					dataType = new TypedefDataType("WORD", SignedWordDataType.dataType);
+				else if(word.equals("UWORD"))
+					dataType = new TypedefDataType("UWORD", WordDataType.dataType);
+				else if(word.equals("WORDBITS"))
+					dataType = new TypedefDataType("WORDBITS", WordDataType.dataType);
+				else if(word.equals("BYTE"))
+					dataType = new TypedefDataType("BYTE", SignedCharDataType.dataType);
+				else if(word.equals("UBYTE"))
+					dataType = new TypedefDataType("UBYTE", ByteDataType.dataType);
+				else if(word.equals("BYTEBITS"))
+					dataType = new TypedefDataType("BYTEBITS", ByteDataType.dataType);
+				else if(word.equals("RPTR"))
+					dataType = new TypedefDataType("RPTR", WordDataType.dataType);
+				else if(word.equals("STRPTR"))
+					dataType = new TypedefDataType("STRPTR", new PointerDataType(TerminatedStringDataType.dataType));
+				else if(word.equals("CONST_APTR"))
+					dataType = new TypedefDataType("CONST_APTR", new TypedefDataType("APTR", new PointerDataType(VoidDataType.dataType)));
+				else if(word.equals("CONST_STRPTR"))
+					dataType = new TypedefDataType("CONST_STRPTR", new TypedefDataType("STRPTR", new PointerDataType(TerminatedStringDataType.dataType)));
+				else if(word.equals("BOOL"))
+					dataType = new TypedefDataType("BOOL", WordDataType.dataType);
+				else {
+					// TODO: more structs, enums
+					var newType = program.getDataTypeManager().getDataType("/" + word);
+					if(newType != null)
+						dataType = newType;
+					else {
+						System.out.println(word + " not found!");
+						return dataType;
+					}
+				}
+			}
+		}
+		return dataType;
+	}
+
 	private static void createFunctionsSegment(FlatProgramAPI fpa, String lib, FdLibFunctions funcs, MessageLog log) throws InvalidInputException, DuplicateNameException, CodeUnitInsertionException {
 		if ((null == funcs) || (fpa.getMemoryBlock(lib) != null)) {
 			return;
@@ -188,20 +263,20 @@ public class AmigaHunkAnalyzer extends AbstractAnalyzer {
 			Function function = fpa.getFunctionAt(funcAddress);
 			function.setCustomVariableStorage(true);
 
+			if(func.getName(false).equals("InternalUnLoadSeg"))
+				System.out.println(func.getName(true));
+
 			List<ParameterImpl> params = new ArrayList<>();
-
 			Program program = fpa.getCurrentProgram();
-
-			var args = func.getArgs();
-			for (var arg : args) {
-				params.add(new ParameterImpl(arg.name, PointerDataType.dataType, program.getRegister(arg.reg), program));
+			for (var arg : func.getArgs()) {
+				var dataType = getAmigaDataType(arg.type, program);
+				params.add(new ParameterImpl(arg.name, dataType, program.getRegister(arg.reg), program));
 			}
 
-			function.updateFunction(null, null, FunctionUpdateType.CUSTOM_STORAGE, true,
-					SourceType.ANALYSIS, params.toArray(ParameterImpl[]::new));
-			
-			DataUtilities.createData(program, funcAddress, new ArrayDataType(ByteDataType.dataType, 6, -1), -1, false,
-					ClearDataMode.CLEAR_ALL_UNDEFINED_CONFLICT_DATA);
+			var retType = func.getReturnType();
+			var returnValue = retType.equals("VOID") ? null : new ReturnParameterImpl(getAmigaDataType(retType, program), program.getRegister("D0"), program);
+			function.updateFunction(null, returnValue, FunctionUpdateType.CUSTOM_STORAGE, true, SourceType.ANALYSIS, params.toArray(ParameterImpl[]::new));
+			DataUtilities.createData(program, funcAddress, new ArrayDataType(ByteDataType.dataType, 6, -1), -1, false, ClearDataMode.CLEAR_ALL_UNDEFINED_CONFLICT_DATA);
 		}
 	}
 	

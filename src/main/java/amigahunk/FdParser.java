@@ -162,7 +162,7 @@ public class FdParser {
 		String tempLine;
 		while((tempLine = reader.readLine()) != null) {
 			if(tempLine.startsWith("\t"))
-				lines.set(lines.size() - 1, lines.get(lines.size() - 1) + tempLine);
+				lines.set(lines.size() - 1, lines.get(lines.size() - 1) + tempLine.substring(1));
 			else
 				lines.add(tempLine);
 		}
