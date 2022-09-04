@@ -9,6 +9,7 @@ import ghidra.program.model.listing.Program;
 public class FdFunction {
 	private final String lib;
 	private final String name;
+	private final String returnType;
 	private final int bias;
 	private final boolean privat;
 	private final int index;
@@ -28,9 +29,10 @@ public class FdFunction {
 	
 	public static final String LIB_SPLITTER = "->";
 	
-	public FdFunction(String lib, String name, int bias, boolean privat) {
+	public FdFunction(String lib, String name, String returnType, int bias, boolean privat) {
 		this.lib = lib;
 		this.name = name;
+		this.returnType = returnType;
 		this.bias = bias;
 		this.index = (bias - 6) / 6;
 		this.privat = privat;
@@ -44,6 +46,10 @@ public class FdFunction {
 
 	public final String getName(boolean withLib) {
 		return (withLib ? lib.replace("_lib.fd", "") + LIB_SPLITTER : "") + name;
+	}
+
+	public final String getReturnType() {
+		return returnType;
 	}
 
 	public final int getBias() {

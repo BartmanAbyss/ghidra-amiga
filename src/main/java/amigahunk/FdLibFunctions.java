@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 
 public class FdLibFunctions {
-
 	private List<FdFunction> funcs;
 	private final String lib;
 	private HashMap<Integer, FdFunction> biasMap;
