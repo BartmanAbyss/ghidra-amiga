@@ -75,19 +75,10 @@ buildExtension {
 	exclude '.editorconfig'
 }
 
-buildExtension.dependsOn 'clean_dist'
-
-task clean_dist(type: Delete) {
-	delete fileTree('dist').files
-}
-
 task install(type: Copy) {
-	def zipFile = fileTree('dist').files[0]
     def outputDir = file("${ghidraInstallDir}/Ghidra/Extensions")
 	delete fileTree("${ghidraInstallDir}/Ghidra/Extensions/${project.name}").files
- 
-    from zipTree(zipFile)
+	from zipTree(tasks.buildExtension.archiveFile)
     into outputDir
+	def zipFile = fileTree('dist').files[0]
 }
-
-install.dependsOn 'buildExtension'
