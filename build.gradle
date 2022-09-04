@@ -37,6 +37,13 @@ else {
 // from https://github.com/astrelsky/vscode-ghidra-skeleton/blob/master/skeleton/build.gradle
 def docs = file(ghidraInstallDir+'/docs/GhidraAPI_javadoc.zip')
 
+repositories { mavenCentral() }
+
+dependencies {
+	testImplementation('junit:junit:4.13')
+	runtimeOnly fileTree(dir: ghidraInstallDir + '/Ghidra', include: "**/*.jar", exclude: project.name + '**')
+}
+
 eclipse {
     classpath {
         downloadJavadoc = true
