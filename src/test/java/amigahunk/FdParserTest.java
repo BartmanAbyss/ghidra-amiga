@@ -20,7 +20,7 @@ public class FdParserTest {
 		assertEquals(125, funcTable.getFunctions().length);
 		var func = funcTable.getFunctionByName("AVL_FindNextNodeByKey");
 		assertNotNull(func);
-		assertEquals("exec.library", func.getLib());
+		assertEquals("exec_library", func.getLib());
 		assertEquals(-0x37e, func.getBias());
 		assertEquals(3, func.getArgs().size());
 
