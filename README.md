@@ -4,3 +4,5 @@ and [ghidra-amiga-whdload](https://github.com/apparentlymart/ghidra-amiga-whdloa
 
 see https://github.com/astrelsky/vscode-ghidra-skeleton
 
+## Development
+- create `data/amiga_ndk39.gdt` with the `amiga_ndk39.prf` C parser profile (put in `USER_HOME/.ghidra_10.1.5_PUBLIC/parseprofiles`). A few headers have been exluded due to parsing problems, and `pack.h` has been added to the start of the parsed headers to ensure correct struct alignment.

@@ -40,14 +40,15 @@ import ghidra.app.util.importer.MessageLog;
 import ghidra.app.util.opinion.AbstractLibrarySupportLoader;
 import ghidra.app.util.opinion.LoadSpec;
 import ghidra.app.util.opinion.Loader;
+import ghidra.framework.Application;
 import ghidra.framework.model.DomainObject;
 import ghidra.program.flatapi.FlatProgramAPI;
 import ghidra.program.model.address.Address;
 import ghidra.program.model.address.AddressOutOfBoundsException;
 import ghidra.program.model.data.DWordDataType;
 import ghidra.program.model.data.DataType;
-import ghidra.program.model.data.DataTypeConflictHandler;
 import ghidra.program.model.data.DataUtilities;
+import ghidra.program.model.data.FileDataTypeManager;
 import ghidra.program.model.data.DataUtilities.ClearDataMode;
 import ghidra.program.model.data.PointerDataType;
 import ghidra.program.model.data.Structure;
@@ -83,15 +84,8 @@ import hunk.Segment;
 import hunk.SegmentType;
 import hunk.XDefinition;
 import hunk.XReference;
-import structs.Custom;
-import structs.ExecLibrary;
 import structs.InitData_Type;
 import structs.InitTable;
-import structs.Library;
-import structs.Message;
-import structs.Resident;
-import structs.WBArg;
-import structs.WBStartup;
 
 public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 	static final String AMIGA_HUNK = "Amiga Executable Hunks loader";
@@ -178,11 +172,10 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 		var block = createSegment(new ByteProviderInputStream(provider), fpa, "ROM", imageBase, provider.length(), false, true, log);
 		var startAddr = block.getStart().add(2);
 
-		createCustomSegment(fpa, log);
+		var fdm = fpa.openDataTypeArchive(Application.getModuleDataFile("amiga_ndk39.gdt").getFile(false), true);
+		createCustomSegment(fpa, fdm, log);
 
-		analyzeResident(mem, fpa, startAddr, log);
-		
-		addCustomTypes(fpa.getCurrentProgram(), monitor, log);
+		analyzeResident(mem, fpa, fdm, startAddr, log);
 		
 		setFunction(fpa, startAddr, "start", log);
 	}
@@ -237,27 +230,30 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 		
 		Address startAddr = fpa.toAddr(addrs[0]);
 		
-		createBaseSegment(fpa, log);
-
-		createCustomSegment(fpa, log);
-
-		analyzeResident(mem, fpa, startAddr, log);
-		
-		addCustomTypes(fpa.getCurrentProgram(), monitor, log);
+		var fdm = fpa.openDataTypeArchive(Application.getModuleDataFile("amiga_ndk39.gdt").getFile(false), true);
+		createBaseSegment(fpa, fdm, log);
+		createCustomSegment(fpa, fdm, log);
+		analyzeResident(mem, fpa, fdm, startAddr, log);
 		
 		if(isExecutable)
 			setFunction(fpa, startAddr, "start", log);
 		
 		addSymbols(bi.getSegments(), fpa.getCurrentProgram().getSymbolTable(), addrs, fpa);
 	}
-	
-	private static void createCustomSegment(FlatProgramAPI fpa, MessageLog log) {
+
+	private static DataType getAmigaDataType(FileDataTypeManager fdm, String type) {
+		var list = new ArrayList<DataType>();
+		fdm.findDataTypes(type, list);
+		return !list.isEmpty() ? list.get(0) : null;
+	}
+
+	private static void createCustomSegment(FlatProgramAPI fpa, FileDataTypeManager fdm, MessageLog log) {
 		// TODO: CIA
 		log.appendMsg("Creating custom chips memory block");
 		var block = createSegment(null, fpa, "Custom", 0xdff000, 0x200, true, false, log);
 		var program = fpa.getCurrentProgram();
 		try {
-			DataType regs = program.getDataTypeManager().addDataType(new Custom().toDataType(), DataTypeConflictHandler.DEFAULT_HANDLER);
+			var regs = getAmigaDataType(fdm, "Custom");
 			DataUtilities.createData(program, block.getStart(), regs, -1, false, ClearDataMode.CLEAR_ALL_UNDEFINED_CONFLICT_DATA);
 			fpa.createLabel(block.getStart(), "Custom", false);
 		} catch (Exception e) {
@@ -278,16 +274,6 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 		}
 	}
 
-	private static void addCustomTypes(Program program, TaskMonitor monitor, MessageLog log) {
-		try {
-			program.getDataTypeManager().addDataType((new Message()).toDataType(), DataTypeConflictHandler.DEFAULT_HANDLER);
-			program.getDataTypeManager().addDataType((new WBArg()).toDataType(), DataTypeConflictHandler.DEFAULT_HANDLER);
-			program.getDataTypeManager().addDataType((new WBStartup()).toDataType(), DataTypeConflictHandler.DEFAULT_HANDLER);
-		} catch (DuplicateNameException | IOException e) {
-			log.appendException(e);
-		}
-	}
-	
 	private static void relocateSegment(Segment seg, int segOffset, final List<byte[]> datas, Memory mem, FlatProgramAPI fpa, MessageLog log) {
 		Segment[] toSegs = seg.getRelocationsToSegments();
 
@@ -470,7 +456,7 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 		return buffer.array();
 	}
 
-	private static void analyzeResident(Memory mem, FlatProgramAPI fpa, Address startAddr, MessageLog log) {
+	private static void analyzeResident(Memory mem, FlatProgramAPI fpa, FileDataTypeManager fdm, Address startAddr, MessageLog log) {
 		Program program = fpa.getCurrentProgram();
 		ReferenceManager refMgr = program.getReferenceManager();
 		var funcsList = new FdFunctionsInLibs();
@@ -490,9 +476,7 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 					continue;
 				}
 
-				DataUtilities.createData(program, addr, (new Resident()).toDataType(), -1, false,
-						ClearDataMode.CLEAR_ALL_UNDEFINED_CONFLICT_DATA);
-
+				DataUtilities.createData(program, addr, getAmigaDataType(fdm, "Resident"), -1, false, ClearDataMode.CLEAR_ALL_UNDEFINED_CONFLICT_DATA);
 				byte rt_Flags = mem.getByte(addr.add(10));
 
 				var NameAddr = addr.getNewAddress(mem.getInt(addr.add(14), true));
@@ -505,8 +489,7 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 					long rt_Init = mem.getInt(addr.add(22));
 					Address rt_InitAddr = fpa.toAddr(rt_Init);
 
-					DataUtilities.createData(program, rt_InitAddr, (new InitTable()).toDataType(), -1, false,
-							ClearDataMode.CLEAR_ALL_UNDEFINED_CONFLICT_DATA);
+					DataUtilities.createData(program, rt_InitAddr, (new InitTable()).toDataType(), -1, false, ClearDataMode.CLEAR_ALL_UNDEFINED_CONFLICT_DATA);
 
 					/* long it_DataSize = */mem.getInt(rt_InitAddr.add(0));
 					long it_FuncTable = mem.getInt(rt_InitAddr.add(4));
@@ -521,7 +504,7 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 					List<ParameterImpl> params = new ArrayList<>();
 					
 					Structure baseStruct = new StructureDataType("BaseLib", 0);
-					baseStruct.add((new Library()).toDataType(), "base", null);
+					baseStruct.add(getAmigaDataType(fdm, "Library"), "base", null);
 					baseStruct.add(WordDataType.dataType, "field0", null);
 
 					params.add(new ParameterImpl("libBase", PointerDataType.dataType, program.getRegister("A6"), program));
@@ -541,8 +524,7 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 							} catch (Exception e) {
 								break;
 							}
-							DataUtilities.createData(program, it_DataInitAddr, tt.toDataType(), -1, false,
-									ClearDataMode.CLEAR_ALL_UNDEFINED_CONFLICT_DATA);
+							DataUtilities.createData(program, it_DataInitAddr, tt.toDataType(), -1, false, ClearDataMode.CLEAR_ALL_UNDEFINED_CONFLICT_DATA);
 							it_DataInitAddr = it_DataInitAddr.add(tt.toDataType().getLength());
 						}
 					}
@@ -662,15 +644,14 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 		return null;
 	}
 
-	private static void createBaseSegment(FlatProgramAPI fpa, MessageLog log) {
+	private static void createBaseSegment(FlatProgramAPI fpa, FileDataTypeManager fdm, MessageLog log) {
 		MemoryBlock exec = createSegment(null, fpa, "EXEC", 0x4, 4, false, false, log);
 		
 		Program program = fpa.getCurrentProgram();
 
 		try {
-			DataUtilities.createData(program, exec.getStart(), new PointerDataType((new ExecLibrary()).toDataType()), -1, false,
-					ClearDataMode.CLEAR_ALL_UNDEFINED_CONFLICT_DATA);
-		} catch (DuplicateNameException | IOException | CodeUnitInsertionException e) {
+			DataUtilities.createData(program, exec.getStart(), new PointerDataType(getAmigaDataType(fdm, "ExecBase")), -1, false, ClearDataMode.CLEAR_ALL_UNDEFINED_CONFLICT_DATA);
+		} catch (CodeUnitInsertionException e) {
 			log.appendException(e);
 		}
 	}
