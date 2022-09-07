@@ -1,4 +1,4 @@
-package amigahunk;
+package amiga;
 
 import java.io.File;
 import java.io.IOException;

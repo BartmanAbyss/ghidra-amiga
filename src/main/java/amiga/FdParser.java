@@ -1,4 +1,4 @@
-package amigahunk;
+package amiga;
 
 import java.io.BufferedReader;
 import java.io.File;

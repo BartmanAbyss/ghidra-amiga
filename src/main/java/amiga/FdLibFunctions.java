@@ -1,4 +1,4 @@
-package amigahunk;
+package amiga;
 
 import java.util.ArrayList;
 import java.util.HashMap;
