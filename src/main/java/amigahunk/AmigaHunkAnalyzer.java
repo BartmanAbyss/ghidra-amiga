@@ -63,10 +63,6 @@ public class AmigaHunkAnalyzer extends AbstractAnalyzer {
 	private final List<String> filter = new ArrayList<String>();
 	private FdFunctionsInLibs funcsList;
 	
-	public static boolean isAmigaHunkLoader(Program program) {
-		return program.getExecutableFormat().equalsIgnoreCase(AmigaHunkLoader.AMIGA_HUNK);
-	}
-
 	public AmigaHunkAnalyzer() {
 		super("Amiga Library Calls", "Analyses calls to system libraries", AnalyzerType.INSTRUCTION_ANALYZER);
 		
@@ -76,16 +72,15 @@ public class AmigaHunkAnalyzer extends AbstractAnalyzer {
 
 	@Override
 	public boolean getDefaultEnablement(Program program) {
-		return isAmigaHunkLoader(program);
+		return program.getExecutableFormat().contains("Amiga") && !program.getExecutableFormat().contains("Kickstart");
 	}
 
 	@Override
 	public boolean canAnalyze(Program program) {
-		if (isAmigaHunkLoader(program)) {
+		if(program.getLanguage().getProcessor().toString().equals("68000")) {
 			funcsList = new FdFunctionsInLibs();
 			return true;
 		}
-		
 		funcsList = null;
 		return false;
 	}
@@ -213,11 +208,11 @@ public class AmigaHunkAnalyzer extends AbstractAnalyzer {
 			}
 		}
 		
-		AmigaHunkLoader.createSegment(null, fpa, lib, segAddr.getOffset(), segSize, true, true, log);
+		AmigaUtils.createSegment(null, fpa, lib, segAddr.getOffset(), segSize, true, true, log);
 		
 		for (FdFunction func : funcArr) {
 			Address funcAddress = segAddr.add(Math.abs(func.getBias()));
-			AmigaHunkLoader.setFunction(fpa, funcAddress, func.getName(true).replace(FdFunction.LIB_SPLITTER, "_"), log);
+			AmigaUtils.setFunction(fpa, funcAddress, func.getName(true).replace(FdFunction.LIB_SPLITTER, "_"), log);
 			Function function = fpa.getFunctionAt(funcAddress);
 			function.setCustomVariableStorage(true);
 
