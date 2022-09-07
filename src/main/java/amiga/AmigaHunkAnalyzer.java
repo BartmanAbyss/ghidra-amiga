@@ -18,6 +18,10 @@ package amiga;
 import java.util.ArrayList;
 import java.util.List;
 
+import fd.FdFunction;
+import fd.FdFunctionsInLibs;
+import fd.FdLibFunctions;
+import fd.FdParser;
 import ghidra.app.plugin.core.analysis.ConstantPropagationContextEvaluator;
 import ghidra.app.services.AbstractAnalyzer;
 import ghidra.app.services.AnalyzerType;

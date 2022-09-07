@@ -1,4 +1,4 @@
-package amiga;
+package fd;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,7 +37,7 @@ public class FdFunctionsInLibs {
 		}
 	}
 	
-	FdFunctionsInLibs() {
+	public FdFunctionsInLibs() {
 		initList();
 	}
 	

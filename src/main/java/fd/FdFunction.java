@@ -1,4 +1,4 @@
-package amiga;
+package fd;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;

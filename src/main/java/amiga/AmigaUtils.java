@@ -11,6 +11,10 @@ import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import docking.widgets.OptionDialog;
+import fd.FdFunction;
+import fd.FdFunctionsInLibs;
+import fd.FdLibFunctions;
+import fd.FdParser;
 import ghidra.app.util.importer.MessageLog;
 import ghidra.program.flatapi.FlatProgramAPI;
 import ghidra.program.model.address.Address;

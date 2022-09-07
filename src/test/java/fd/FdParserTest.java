@@ -1,4 +1,4 @@
-package amiga;
+package fd;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -6,6 +6,8 @@ import static org.junit.Assert.assertNotNull;
 import java.io.File;
 
 import org.junit.Test;
+
+import fd.FdParser;
 
 public class FdParserTest {
 	@Test
