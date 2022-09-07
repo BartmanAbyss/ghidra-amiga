@@ -19,7 +19,7 @@ public class UssFile {
 	public static boolean isUssFile(BinaryReader reader) {
 		try {
 			String asf = reader.readNextAsciiString(4);
-			return asf.equals("ASF ");
+			return asf.equals("ASF");
 		} catch(IOException ex) {
 			return false;
 		}
@@ -54,7 +54,8 @@ public class UssFile {
 				len -= 4;
 				var inflater = new Inflater();
 				inflater.setInput(reader.readNextByteArray(len));
-				assert(inflater.inflate(chunk.buffer) == uncompressedLen);
+				var resultLen = inflater.inflate(chunk.buffer);
+				assert(resultLen == uncompressedLen);
 			} else {
 				chunk.buffer = reader.readNextByteArray(len);
 			}
