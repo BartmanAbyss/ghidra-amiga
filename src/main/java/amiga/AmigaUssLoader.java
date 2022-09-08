@@ -29,10 +29,16 @@ import ghidra.app.util.opinion.AbstractLibrarySupportLoader;
 import ghidra.app.util.opinion.LoadSpec;
 import ghidra.framework.Application;
 import ghidra.program.flatapi.FlatProgramAPI;
+import ghidra.program.model.data.DataType;
+import ghidra.program.model.data.DataTypeConflictHandler;
+import ghidra.program.model.data.DataUtilities;
+import ghidra.program.model.data.DataUtilities.ClearDataMode;
 import ghidra.program.model.lang.LanguageCompilerSpecPair;
 import ghidra.program.model.listing.Program;
 import ghidra.program.model.mem.Memory;
+import ghidra.util.exception.DuplicateNameException;
 import ghidra.util.task.TaskMonitor;
+import structs.M68KVectors;
 import uss.UssFile;
 
 public class AmigaUssLoader extends AbstractLibrarySupportLoader {
@@ -72,8 +78,16 @@ public class AmigaUssLoader extends AbstractLibrarySupportLoader {
 
 		var fdm = fpa.openDataTypeArchive(Application.getModuleDataFile("amiga_ndk39.gdt").getFile(false), true);
 		AmigaUtils.createCustomSegment(fpa, fdm, log);
+		AmigaUtils.addCustomTypes(fpa.getCurrentProgram(), log);
+		try {
+			DataType exceptionTable = fpa.getCurrentProgram().getDataTypeManager().addDataType(new M68KVectors().toDataType(), DataTypeConflictHandler.DEFAULT_HANDLER);
+			DataUtilities.createData(fpa.getCurrentProgram(), fpa.toAddr(0), exceptionTable, -1, false, ClearDataMode.CLEAR_ALL_UNDEFINED_CONFLICT_DATA);
+			fpa.createLabel(fpa.toAddr(0), "ExceptionVectors", false);
+		} catch (Exception e) {
+			log.appendException(e);
+		}
 
-		// TODO: vectors, ROM, CPU state, descriptions
+		// TODO: ROM, CPU state, descriptions
 
 		//AmigaUtils.analyzeResident(mem, fpa, fdm, startAddr, log);
 		//AmigaUtils.setFunction(fpa, startAddr, "start", log);

@@ -20,6 +20,7 @@ import ghidra.program.flatapi.FlatProgramAPI;
 import ghidra.program.model.address.Address;
 import ghidra.program.model.address.AddressOutOfBoundsException;
 import ghidra.program.model.data.DataType;
+import ghidra.program.model.data.DataTypeConflictHandler;
 import ghidra.program.model.data.DataUtilities;
 import ghidra.program.model.data.DataUtilities.ClearDataMode;
 import ghidra.program.model.data.FileDataTypeManager;
@@ -40,6 +41,7 @@ import ghidra.program.model.symbol.SourceType;
 import ghidra.program.model.util.CodeUnitInsertionException;
 import ghidra.util.exception.DuplicateNameException;
 import ghidra.util.exception.InvalidInputException;
+import structs.CopperInst;
 import structs.InitData_Type;
 import structs.InitTable;
 
@@ -96,6 +98,10 @@ public class AmigaUtils {
 		} catch (Exception e) {
 			log.appendException(e);
 		}
+	}
+
+	public static void addCustomTypes(Program program, MessageLog log) {
+		program.getDataTypeManager().addDataType(CopperInst.dataType, DataTypeConflictHandler.DEFAULT_HANDLER);
 	}
 
 	private static String showSelectFile(String title) {

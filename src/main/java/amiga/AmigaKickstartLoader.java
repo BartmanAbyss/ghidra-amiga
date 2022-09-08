@@ -69,6 +69,7 @@ public class AmigaKickstartLoader extends AbstractLibrarySupportLoader {
 
 		var fdm = fpa.openDataTypeArchive(Application.getModuleDataFile("amiga_ndk39.gdt").getFile(false), true);
 		AmigaUtils.createCustomSegment(fpa, fdm, log);
+		AmigaUtils.addCustomTypes(fpa.getCurrentProgram(), log);
 		AmigaUtils.analyzeResident(mem, fpa, fdm, startAddr, log);
 		AmigaUtils.setFunction(fpa, startAddr, "start", log);
 	}
