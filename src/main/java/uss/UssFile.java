@@ -15,6 +15,7 @@ public class UssFile {
 	public String romId, emuName, emuVersion, description;
 	public long cpuModel = 0, cpuFlags = 0, cpuExtraFlags = 0, chipsetFlags = 0;
 	public ArrayList<MemoryRegion> memBlocks = new ArrayList<>();
+	private byte[] custom = new byte[0x200];
 
 	public static boolean isUssFile(BinaryReader reader) {
 		try {
@@ -35,6 +36,7 @@ public class UssFile {
 	private static final int a3000MemBase = 0x0800_0000;
 	private static final int z2MemBase = 0x0020_0000;
 	private static final int z3MemBase = 0x4000_0000;
+	private static final int customBase = 0xdff000;
 
 	private long fastMem0Addr = 0, fastMem1Addr = 0, z3fastMemAddr = 0, a3kMemAddr = a3000MemBase;
 
@@ -90,6 +92,18 @@ public class UssFile {
 			case "CHIP": 
 				readChip(chunk.buffer); 
 				break;
+			case "AUD0": readAud(0, chunk.buffer); break;
+			case "AUD1": readAud(1, chunk.buffer); break;
+			case "AUD2": readAud(2, chunk.buffer); break;
+			case "AUD3": readAud(3, chunk.buffer); break;
+			case "SPR0": readSpr(0, chunk.buffer); break;
+			case "SPR1": readSpr(1, chunk.buffer); break;
+			case "SPR2": readSpr(2, chunk.buffer); break;
+			case "SPR3": readSpr(3, chunk.buffer); break;
+			case "SPR4": readSpr(4, chunk.buffer); break;
+			case "SPR5": readSpr(5, chunk.buffer); break;
+			case "SPR6": readSpr(6, chunk.buffer); break;
+			case "SPR7": readSpr(7, chunk.buffer); break;
 			case "ROM":
 				readRom(chunk.buffer); 
 				break;
@@ -123,8 +137,21 @@ public class UssFile {
 				break;
 			}
 		}
+		memBlocks.add(new MemoryRegion("Custom", customBase, custom)); 
 		for(var mem: memBlocks)
 			System.out.format("*Mem* $%08x+$%08x = '%s'\n", mem.start, mem.length, mem.name);
+	}
+
+	private void readAud(int i, byte[] buffer) throws IOException {
+		var reader = new BinaryReader(new ByteArrayProvider(buffer), false);
+		// TODO.. WinUAE documentation is strange.. maybe later
+	}
+
+	private void readSpr(int i, byte[] buffer) throws IOException {
+		var reader = new BinaryReader(new ByteArrayProvider(buffer), false);
+		System.arraycopy(reader.readNextByteArray(4), 0, custom, 0x120 + i * 4, 4); // SPRxPT
+		System.arraycopy(reader.readNextByteArray(8), 0, custom, 0x140 + i * 8, 8); // SPRxDEF
+		// ...here comes some AGA stuff
 	}
 
 	private void readExpansion(byte[] buffer) throws IOException {
@@ -156,7 +183,12 @@ public class UssFile {
 		memBlocks.add(new MemoryRegion("ROM", start, size));
 	}
 
-	private void readChip(byte[] buffer) {
+	private void readChip(byte[] buffer) throws IOException {
+		var reader = new BinaryReader(new ByteArrayProvider(buffer), false);
+		var chipsetFlags = reader.readNextUnsignedInt();
+		System.arraycopy(reader.readNextByteArray(0xa0), 0, custom, 0, 0xa0);
+		System.arraycopy(reader.readNextByteArray(0x120 - 0xe0), 0, custom, 0xe0, 0x120 - 0xe0);
+		System.arraycopy(reader.readNextByteArray(0x200 - 0x180), 0, custom, 0x180, 0x200 - 0x180);
 	}
 
 	private void readCpuExtra(byte[] buffer) {

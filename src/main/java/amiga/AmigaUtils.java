@@ -100,7 +100,7 @@ public class AmigaUtils {
 		}
 	}
 
-	public static void addCustomTypes(Program program, MessageLog log) {
+	public static void addTypes(Program program, MessageLog log) {
 		program.getDataTypeManager().addDataType(CopperInst.dataType, DataTypeConflictHandler.DEFAULT_HANDLER);
 	}
 

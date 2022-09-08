@@ -40,7 +40,15 @@ public class CustomChipRegisters {
 		SPR5POS(RegType.Word), SPR5CTL(RegType.Word), SPR5DATA(RegType.Word), SPR5DATB(RegType.Word),
 		SPR6POS(RegType.Word), SPR6CTL(RegType.Word), SPR6DATA(RegType.Word), SPR6DATB(RegType.Word),
 		SPR7POS(RegType.Word), SPR7CTL(RegType.Word), SPR7DATA(RegType.Word), SPR7DATB(RegType.Word),
-		COLOR(RegType.Word, 32), HTOTAL(RegType.Word), HSSTOP(RegType.Word), HBSTRT(RegType.Word), HBSTOP(RegType.Word),
+		COLOR00(RegType.Word), COLOR01(RegType.Word), COLOR02(RegType.Word), COLOR03(RegType.Word), 
+		COLOR04(RegType.Word), COLOR05(RegType.Word), COLOR06(RegType.Word), COLOR07(RegType.Word), 
+		COLOR08(RegType.Word), COLOR09(RegType.Word), COLOR10(RegType.Word), COLOR11(RegType.Word), 
+		COLOR12(RegType.Word), COLOR13(RegType.Word), COLOR14(RegType.Word), COLOR15(RegType.Word), 
+		COLOR16(RegType.Word), COLOR17(RegType.Word), COLOR18(RegType.Word), COLOR19(RegType.Word), 
+		COLOR20(RegType.Word), COLOR21(RegType.Word), COLOR22(RegType.Word), COLOR23(RegType.Word), 
+		COLOR24(RegType.Word), COLOR25(RegType.Word), COLOR26(RegType.Word), COLOR27(RegType.Word), 
+		COLOR28(RegType.Word), COLOR29(RegType.Word), COLOR30(RegType.Word), COLOR31(RegType.Word), 
+		HTOTAL(RegType.Word), HSSTOP(RegType.Word), HBSTRT(RegType.Word), HBSTOP(RegType.Word),
 		VTOTAL(RegType.Word), VSSTOP(RegType.Word), VBSTRT(RegType.Word), VBSTOP(RegType.Word), SPRHSTRT(RegType.Word),
 		SPRHSTOP(RegType.Word), BPLHSTRT(RegType.Word), BPLHSTOP(RegType.Word), HHPOSW(RegType.Word),
 		HHPOSR(RegType.Word), BEAMCON0(RegType.Word), HSSTRT(RegType.Word), VSSTRT(RegType.Word), HCENTER(RegType.Word),
@@ -49,15 +57,8 @@ public class CustomChipRegisters {
 		RESERVED18(RegType.Word), RESERVED19(RegType.Word), FMODE(RegType.Word), NOOP(RegType.Word);
 
 		public RegType type;
-		public int count;
 
 		Register(RegType type) {
-			this.count = 1;
-			this.type = type;
-		}
-
-		Register(RegType type, int count) {
-			this.count = count;
 			this.type = type;
 		}
 
@@ -81,8 +82,6 @@ public class CustomChipRegisters {
 					length = 1;
 					break;
 				case DWord:
-					length = 2;
-					break;
 				case Addr:
 					length = 2;
 					break;

@@ -77,8 +77,11 @@ public class AmigaUssLoader extends AbstractLibrarySupportLoader {
 		}
 
 		var fdm = fpa.openDataTypeArchive(Application.getModuleDataFile("amiga_ndk39.gdt").getFile(false), true);
-		AmigaUtils.createCustomSegment(fpa, fdm, log);
-		AmigaUtils.addCustomTypes(fpa.getCurrentProgram(), log);
+
+		DataUtilities.createData(fpa.getCurrentProgram(), fpa.toAddr(0xdff000), AmigaUtils.getAmigaDataType(fdm, "Custom"), -1, false, ClearDataMode.CLEAR_ALL_UNDEFINED_CONFLICT_DATA);
+		fpa.createLabel(fpa.toAddr(0xdff000), "Custom", false);
+
+		AmigaUtils.addTypes(fpa.getCurrentProgram(), log);
 		try {
 			DataType exceptionTable = fpa.getCurrentProgram().getDataTypeManager().addDataType(new M68KVectors().toDataType(), DataTypeConflictHandler.DEFAULT_HANDLER);
 			DataUtilities.createData(fpa.getCurrentProgram(), fpa.toAddr(0), exceptionTable, -1, false, ClearDataMode.CLEAR_ALL_UNDEFINED_CONFLICT_DATA);
