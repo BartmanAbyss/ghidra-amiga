@@ -36,6 +36,7 @@ public class CopperList extends GhidraScript {
 		var types = this.getDataTypes("CopperInst");
 		if(types.length > 0) {
 			for(int i = 0; i < 512; i++) {
+				clearListing(addr.add(i * 4), addr.add(i * 4 + 3));
 				createData(addr.add(i * 4), types[0]);
 				var word0 = currentProgram.getMemory().getShort(addr.add(i * 4 + 0), true);
 				var word1 = currentProgram.getMemory().getShort(addr.add(i * 4 + 2), true);

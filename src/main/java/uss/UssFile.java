@@ -16,6 +16,7 @@ public class UssFile {
 	public long cpuModel = 0, cpuFlags = 0, cpuExtraFlags = 0, chipsetFlags = 0;
 	public ArrayList<MemoryRegion> memBlocks = new ArrayList<>();
 	private byte[] custom = new byte[0x200];
+	public long[] registers = new long[16];
 
 	public static boolean isUssFile(BinaryReader reader) {
 		try {
@@ -191,10 +192,15 @@ public class UssFile {
 		System.arraycopy(reader.readNextByteArray(0x200 - 0x180), 0, custom, 0x180, 0x200 - 0x180);
 	}
 
-	private void readCpuExtra(byte[] buffer) {
+	private void readCpuExtra(byte[] buffer) throws IOException {
 	}
 
-	private void readCpu(byte[] buffer) {
+	private void readCpu(byte[] buffer) throws IOException {
+		var reader = new BinaryReader(new ByteArrayProvider(buffer), false);
+		var cpuModel = reader.readNextUnsignedInt();
+		var cpuFlags = reader.readNextUnsignedInt();
+		for(int i = 0; i < 16; i++)
+			registers[i] = reader.readNextUnsignedInt();
 	}
 
 	public static class MemoryRegion {

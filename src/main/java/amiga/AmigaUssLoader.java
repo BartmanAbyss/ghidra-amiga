@@ -36,7 +36,8 @@ import ghidra.program.model.data.DataUtilities.ClearDataMode;
 import ghidra.program.model.lang.LanguageCompilerSpecPair;
 import ghidra.program.model.listing.Program;
 import ghidra.program.model.mem.Memory;
-import ghidra.util.exception.DuplicateNameException;
+import ghidra.program.model.symbol.SourceType;
+import ghidra.util.exception.InvalidInputException;
 import ghidra.util.task.TaskMonitor;
 import structs.M68KVectors;
 import uss.UssFile;
@@ -90,7 +91,17 @@ public class AmigaUssLoader extends AbstractLibrarySupportLoader {
 			log.appendException(e);
 		}
 
-		// TODO: ROM, CPU state, descriptions
+		// set PC
+		var pcAddr = fpa.toAddr(uss.registers[15]);
+		try {
+			fpa.disassemble(pcAddr);
+			fpa.addEntryPoint(pcAddr);
+			fpa.getCurrentProgram().getSymbolTable().createLabel(pcAddr, "pc", SourceType.IMPORTED);
+		} catch (InvalidInputException e) {
+			log.appendException(e);
+		}
+
+		// TODO: CIA, ROM, CPU state, descriptions
 
 		//AmigaUtils.analyzeResident(mem, fpa, fdm, startAddr, log);
 		//AmigaUtils.setFunction(fpa, startAddr, "start", log);
