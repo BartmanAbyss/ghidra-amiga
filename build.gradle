@@ -76,6 +76,7 @@ buildExtension {
 	exclude 'java-formatter.xml'
 	exclude '3rdparty'
 	exclude 'amiga_ndk39.prf'
+	exclude 'test'
 }
 
 task install(type: Copy) {
