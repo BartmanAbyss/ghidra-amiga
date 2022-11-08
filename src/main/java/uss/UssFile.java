@@ -168,9 +168,9 @@ public class UssFile {
 	private void readHeader(byte[] buffer) throws IOException {
 		var reader = new BinaryReader(new ByteArrayProvider(buffer), false);
 		reader.setPointerIndex(4);
-		emuName = reader.readNextNullTerminatedAsciiString();
-		emuVersion = reader.readNextNullTerminatedAsciiString();
-		description = reader.readNextNullTerminatedAsciiString();
+		emuName = reader.readNextAsciiString();
+		emuVersion = reader.readNextAsciiString();
+		description = reader.readNextAsciiString();
 		System.out.format("  Saved with '%s %s', description: '%s'\n", emuName, emuVersion, description);
 	}
 
@@ -179,7 +179,7 @@ public class UssFile {
 		var start = reader.readNextUnsignedInt();
 		var size = reader.readNextUnsignedInt();
 		reader.setPointerIndex(20);
-		romId = reader.readNextNullTerminatedAsciiString();
+		romId = reader.readNextAsciiString();
 		System.out.format("  ROM: '%s' @ $%08x+$%08x\n", romId, start, size);
 		memBlocks.add(new MemoryRegion("ROM", start, size));
 	}
