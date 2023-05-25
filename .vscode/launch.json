@@ -13,7 +13,7 @@
 			"port": "18001"
 		},
 		
-		{ // not working correctly (doesn't fid module directory for extension)
+		{ // not working correctly (doesn't find module directory for extension)
 			"type": "java",
 			"name": "Ghidra Debug",
 			"projectName": "ghidra-amiga",

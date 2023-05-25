@@ -16,7 +16,7 @@ public class CopperInst extends AbstractIntegerDataType {
 	}
 
 	public CopperInst(DataTypeManager dtm) {
-		super("CopperInst", false, dtm);
+		super("CopperInst", dtm);
 	}
 
 	@Override
@@ -122,6 +122,11 @@ public class CopperInst extends AbstractIntegerDataType {
 	@Override
 	public int getLength() {
 		return 4;
+	}
+
+	@Override
+	public boolean isSigned() {
+		return false;
 	}
 
 	@Override
