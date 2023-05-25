@@ -236,7 +236,7 @@ public class AmigaHunkAnalyzer extends AbstractAnalyzer {
 	
 	public AddressSetView flowConstants(final Program program, Address flowStart, AddressSetView flowSet, final SymbolicPropogator symEval, final TaskMonitor monitor) throws CancelledException {
 		ConstantPropagationContextEvaluator eval =
-			new ConstantPropagationContextEvaluator(true) {
+			new ConstantPropagationContextEvaluator(monitor, true) {
 				@Override
 				public boolean evaluateContext(VarnodeContext context, Instruction instr) {
 					String mnemonic = instr.getMnemonicString();
