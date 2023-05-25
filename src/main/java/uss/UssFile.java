@@ -20,7 +20,7 @@ public class UssFile {
 
 	public static boolean isUssFile(BinaryReader reader) {
 		try {
-			String asf = reader.readNextAsciiString(4);
+			String asf = reader.readNextAsciiString(4).stripTrailing();
 			return asf.equals("ASF");
 		} catch(IOException ex) {
 			return false;
@@ -47,7 +47,7 @@ public class UssFile {
 				return null;
 			var chunk = new Chunk();
 			// see WinUAE:savestate.cpp@restore_chunk
-			chunk.name = reader.readNextAsciiString(4);
+			chunk.name = reader.readNextAsciiString(4).stripTrailing();
 			var len = (int)reader.readNextUnsignedInt() - 4 - 4 - 4;
 			var flags = reader.readNextUnsignedInt();
 			if((flags & 1 ) != 0) {
