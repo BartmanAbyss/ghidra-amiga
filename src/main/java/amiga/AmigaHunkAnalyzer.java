@@ -172,7 +172,7 @@ public class AmigaHunkAnalyzer extends AbstractAnalyzer {
 		type = type.replace("VOLATILE ", "");
 		if(type.contains("("))
 			return new PointerDataType(new FunctionDefinitionDataType("FUNC")); // TODO: correct function pointer type
-		for(var word : type.split(" ")) {
+		for(var word : type.split("\\s+")) {
 			if(word.equals("*")) {
 				dataType = new PointerDataType(dataType);
 			} else if(word.equals("**")) {
