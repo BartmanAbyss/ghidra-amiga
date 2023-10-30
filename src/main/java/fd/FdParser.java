@@ -149,7 +149,17 @@ public class FdParser {
 
 		return funcTable;
 	}
-
+	
+	// find the last space or tab, searching from 'startSearchAt'
+	private static int lastIndexOfSpaceOrTab(String line,int startSearchAt) {
+		for(int off = Math.min(startSearchAt, line.length() - 1); off >= 0; --off) {
+			if (line.charAt(off) == ' ' || line.charAt(off) == '\t') {
+				return off;
+			}
+		}
+		return -1;
+	}
+	
 	private static FdLibFunctions readSfd(File f) throws Exception {
 		FdLibFunctions funcTable = null;
 		var libname = f.getName();
@@ -193,7 +203,7 @@ public class FdParser {
 				var paren_reg = line.lastIndexOf('(');
 				assert paren_arg != -1;
 				assert paren_reg != -1;
-				var func_spc = line.lastIndexOf(' ', paren_arg);
+				var func_spc = lastIndexOfSpaceOrTab(line, paren_arg);
 				assert func_spc != -1;
 				var func = new FdFunction(libname, line.substring(func_spc + 1, paren_arg), line.substring(0, func_spc), offset, false);
 
@@ -214,7 +224,7 @@ public class FdParser {
 					var next = StringUtils.indexOfAny(line.substring(p_arg), "(),") + p_arg;
 					assert next >= p_arg && next < paren_reg;
 					if(line.charAt(next) == ',' || line.charAt(next) == ')') {
-						var arg_spc = line.lastIndexOf(' ', next);
+						var arg_spc = lastIndexOfSpaceOrTab(line,next);
 						assert arg_spc != -1;
 						if(arg_spc > p_arg) {
 							type = line.substring(p_arg, arg_spc);
@@ -245,7 +255,7 @@ public class FdParser {
 						assert line.charAt(func_end + 1) == ',';
 						p_arg = func_end + 2;
 					}
-					if(line.charAt(p_arg) == ' ') p_arg++;
+					if(line.charAt(p_arg) == ' ' || line.charAt(p_arg) == '\t') p_arg++;
 				}
 				//System.out.format("%s returns '%s' = -$%x\n", func.getName(false), func.getReturnType(), Math.abs(func.getBias()));
 				//for(var arg : func.getArgs())
