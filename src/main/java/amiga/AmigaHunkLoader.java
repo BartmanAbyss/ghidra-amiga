@@ -178,8 +178,6 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 		Address startAddr = fpa.toAddr(addrs[0]);
 		
 		var fdm = fpa.openDataTypeArchive(Application.getModuleDataFile("amiga_ndk39.gdt").getFile(false), true);
-		AmigaUtils.createExecBaseSegment(fpa, fdm, log);
-		AmigaUtils.createCustomSegment(fpa, fdm, log);
 		AmigaUtils.addTypes(fpa.getCurrentProgram(), log);
 		AmigaUtils.analyzeResident(mem, fpa, fdm, startAddr, log);
 		
