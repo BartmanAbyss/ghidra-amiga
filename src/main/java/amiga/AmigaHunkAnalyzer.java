@@ -122,12 +122,21 @@ public class AmigaHunkAnalyzer extends AbstractAnalyzer {
 
 	@Override
 	public boolean added(Program program, AddressSetView set, TaskMonitor monitor, MessageLog log) {
-		monitor.setMessage("Creating library functions...");
+		monitor.setMessage("Setting up the Amiga memory map");
 		
 		FlatProgramAPI fpa = new FlatProgramAPI(program);
-	
+		FileDataTypeManager fdm;
 		try {
-			var fdm = fpa.openDataTypeArchive(Application.getModuleDataFile("amiga_ndk39.gdt").getFile(false), true);
+			fdm = fpa.openDataTypeArchive(Application.getModuleDataFile("amiga_ndk39.gdt").getFile(false), true);
+			AmigaUtils.createExecBaseSegment(fpa, fdm, log);
+			AmigaUtils.createCustomSegment(fpa, fdm, log);
+		} catch (Exception e) {
+			log.appendException(e);
+			return false;
+		}
+	
+		monitor.setMessage("Creating library functions...");
+		try {
 			for(String lib : funcsList.getLibsList(filter)) {
 				createFunctionsSegment(fpa, fdm, lib, funcsList.getFunctionTableByLib(lib), log);
 			}
@@ -241,10 +250,14 @@ public class AmigaHunkAnalyzer extends AbstractAnalyzer {
 				public boolean evaluateContext(VarnodeContext context, Instruction instr) {
 					String mnemonic = instr.getMnemonicString();
 
-					if (mnemonic.equals("jsr") || mnemonic.equals("jmp")) {
+					if (!mnemonic.equals("jsr") && !mnemonic.equals("jmp")) {
+						return false;
+					}
 						Object[] objs = instr.getOpObjects(0);
 						Register reg = instr.getRegister(1);
-						if (reg != null && reg.getName().equals("A6") && objs.length != 0 && (objs[0] instanceof Scalar)) {
+					if (reg == null || !reg.getName().equals("A6") || objs.length == 0 || (!(objs[0] instanceof Scalar))) {
+						return false;
+					}
 							int val = (int)((Scalar)objs[0]).getSignedValue();
 							
 							if (val >= 0) {
@@ -254,24 +267,25 @@ public class AmigaHunkAnalyzer extends AbstractAnalyzer {
 							
 							for (FdFunction func : funcs) {
 								MemoryBlock libMemory = program.getMemory().getBlock(func.getLib());
-								if (libMemory != null) {
+						if (libMemory == null) {
+							continue;
+						}
 									Address funcStart = libMemory.getStart().add(Math.abs(func.getBias()));
-									if (libMemory.contains(funcStart)) {
+						if (!libMemory.contains(funcStart)) {
+							continue;
+						}
 										Reference primaryRef = instr.getPrimaryReference(1);
 
 										instr.addOperandReference(1, funcStart, RefType.CALL_OVERRIDE_UNCONDITIONAL, SourceType.ANALYSIS);
 
-										if (((null == primaryRef) || (SourceType.ANALYSIS == primaryRef.getSource())) &&
-												!func.isPrivate() && func.getLib().equals(FdParser.EXEC_LIB)) {
+						if (((null != primaryRef) && (SourceType.ANALYSIS != primaryRef.getSource())) ||
+								func.isPrivate() || !func.getLib().equals(FdParser.EXEC_LIB)) {
+							continue;
+						}
 											for (Reference ref : instr.getOperandReferences(1)) {
 												if (funcStart.equals(ref.getToAddress())) {
 													instr.setPrimaryMemoryReference(ref);
 													break;
-												}
-											}
-										}
-									}
-								}
 							}
 						}
 					}
