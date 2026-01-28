@@ -15,20 +15,11 @@
  */
 package amiga;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import ghidra.app.plugin.core.reloc.InstructionStasher;
 import ghidra.app.util.Option;
 import ghidra.app.util.OptionException;
 import ghidra.app.util.bin.BinaryReader;
 import ghidra.app.util.bin.ByteProvider;
-import ghidra.app.util.bin.ByteProviderInputStream;
 import ghidra.app.util.importer.MessageLog;
 import ghidra.app.util.opinion.AbstractLibrarySupportLoader;
 import ghidra.app.util.opinion.LoadSpec;
@@ -52,17 +43,14 @@ import ghidra.program.model.symbol.Symbol;
 import ghidra.program.model.symbol.SymbolTable;
 import ghidra.program.model.util.CodeUnitInsertionException;
 import ghidra.util.task.TaskMonitor;
-import hunk.BinFmtHunk;
-import hunk.BinImage;
-import hunk.HunkBlockFile;
-import hunk.HunkBlockType;
-import hunk.HunkParseError;
-import hunk.Reloc;
-import hunk.Relocate;
-import hunk.Segment;
-import hunk.SegmentType;
-import hunk.XDefinition;
-import hunk.XReference;
+import hunk.*;
+
+import java.io.ByteArrayInputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 	public static final int DEF_IMAGE_BASE = 0x21F000;
@@ -98,19 +86,29 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 	}
 
 	@Override
-	protected void load(ByteProvider provider, LoadSpec loadSpec, List<Option> options, Program program, TaskMonitor monitor, MessageLog log) throws IOException {
+	protected void load(Program program, ImporterSettings importerSettings)  {
 		refsLastIndex = 0;
 		defsLastIndex = 0;
 		
 		FlatProgramAPI fpa = new FlatProgramAPI(program);
 		Memory mem = program.getMemory();
 
+		MessageLog log = importerSettings.log();
+		ByteProvider provider = importerSettings.provider();
+		TaskMonitor monitor = importerSettings.monitor();
+
 		BinaryReader reader = new BinaryReader(provider, false);
 
 		// executable
 		HunkBlockType type = HunkBlockFile.peekType(reader);
-		HunkBlockFile hbf = new HunkBlockFile(reader, type == HunkBlockType.TYPE_LOADSEG);
-		switch (type) {
+        HunkBlockFile hbf = null;
+        try {
+            hbf = new HunkBlockFile(reader, type == HunkBlockType.TYPE_LOADSEG);
+        } catch (HunkParseError e) {
+ 			e.printStackTrace();
+			log.appendException(e);
+        }
+        switch (type) {
 		case TYPE_LOADSEG: 
 		case TYPE_UNIT:
 			try {
@@ -385,7 +383,7 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 	}
 
 	@Override
-	public List<Option> getDefaultOptions(ByteProvider provider, LoadSpec loadSpec, DomainObject domainObject, boolean isLoadIntoProgram) {
+	public List<Option> getDefaultOptions(ByteProvider provider, LoadSpec loadSpec, DomainObject domainObject, boolean loadIntoProgram, boolean mirrorFsLayout) {
 		List<Option> list = new ArrayList<Option>();
 
 		LanguageCompilerSpecPair pair = loadSpec.getLanguageCompilerSpec();

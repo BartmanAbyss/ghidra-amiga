@@ -15,12 +15,6 @@
  */
 package amiga;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import ghidra.app.util.Option;
 import ghidra.app.util.bin.ByteProvider;
 import ghidra.app.util.bin.ByteProviderInputStream;
 import ghidra.app.util.importer.MessageLog;
@@ -32,6 +26,11 @@ import ghidra.program.model.lang.LanguageCompilerSpecPair;
 import ghidra.program.model.listing.Program;
 import ghidra.program.model.mem.Memory;
 import ghidra.util.task.TaskMonitor;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class AmigaKickstartLoader extends AbstractLibrarySupportLoader {
 	@Override
@@ -52,9 +51,15 @@ public class AmigaKickstartLoader extends AbstractLibrarySupportLoader {
 	}
 
 	@Override
-	protected void load(ByteProvider provider, LoadSpec loadSpec, List<Option> options, Program program, TaskMonitor monitor, MessageLog log) throws IOException {
+	protected void load(Program program, ImporterSettings importerSettings) throws IOException {
 		FlatProgramAPI fpa = new FlatProgramAPI(program);
 		Memory mem = program.getMemory();
+
+		MessageLog log = importerSettings.log();
+		ByteProvider provider = importerSettings.provider();
+		TaskMonitor monitor = importerSettings.monitor();
+		LoadSpec loadSpec = importerSettings.loadSpec();
+
 		try {
 			loadKickstart(provider, loadSpec.getDesiredImageBase(), fpa, monitor, mem, log);
 		} catch (Throwable e) {

@@ -15,13 +15,6 @@
  */
 package amiga;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import ghidra.app.util.Option;
 import ghidra.app.util.bin.BinaryReader;
 import ghidra.app.util.bin.ByteProvider;
 import ghidra.app.util.importer.MessageLog;
@@ -42,6 +35,12 @@ import ghidra.util.task.TaskMonitor;
 import structs.M68KVectors;
 import uss.UssFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 public class AmigaUssLoader extends AbstractLibrarySupportLoader {
 	@Override
 	public String getName() {
@@ -60,9 +59,14 @@ public class AmigaUssLoader extends AbstractLibrarySupportLoader {
 	}
 
 	@Override
-	protected void load(ByteProvider provider, LoadSpec loadSpec, List<Option> options, Program program, TaskMonitor monitor, MessageLog log) throws IOException {
+	protected void load(Program program, ImporterSettings importerSettings) throws IOException{
 		FlatProgramAPI fpa = new FlatProgramAPI(program);
 		Memory mem = program.getMemory();
+
+		MessageLog log = importerSettings.log();
+		ByteProvider provider = importerSettings.provider();
+		TaskMonitor monitor = importerSettings.monitor();
+
 		try {
 			loadUss(provider, fpa, monitor, mem, log);
 		} catch (Throwable e) {
