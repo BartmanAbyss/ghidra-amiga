@@ -75,26 +75,42 @@ public class AmigaUtils {
 	}
 
 	public static void createExecBaseSegment(FlatProgramAPI fpa, FileDataTypeManager fdm, MessageLog log) {
-		MemoryBlock exec = createSegment(null, fpa, "EXEC", 0x4, 4, false, false, log);
-		
 		Program program = fpa.getCurrentProgram();
+		MemoryBlock exec = program.getMemory().getBlock("EXEC");
+
 
 		try {
-			DataUtilities.createData(program, exec.getStart(), new PointerDataType(getAmigaDataType(fdm, "ExecBase")), -1, false, ClearDataMode.CLEAR_ALL_UNDEFINED_CONFLICT_DATA);
+			if (exec == null) {
+				exec = createSegment(null, fpa, "EXEC", 0x4, 4, false, false, log);
+				DataUtilities.createData(program, exec.getStart(), new PointerDataType(getAmigaDataType(fdm, "ExecBase")), -1, false, ClearDataMode.CLEAR_ALL_UNDEFINED_CONFLICT_DATA);
+			}
 		} catch (CodeUnitInsertionException e) {
 			log.appendException(e);
 		}
 	}
+	private static void createSegmentIfNeeded(FlatProgramAPI fpa, MessageLog log,String name,DataType dt,long addr,long size ){
+		Program program = fpa.getCurrentProgram();
+		MemoryBlock block = program.getMemory().getBlock(name);
+		if(block != null){
+			return;
+		}
+		try {
+			block = createSegment(null, fpa, name, addr, size, true, false, log);
+			DataUtilities.createData(program, block.getStart(), dt, -1, false, ClearDataMode.CLEAR_ALL_UNDEFINED_CONFLICT_DATA);
+			fpa.createLabel(block.getStart(), name, false);
+		} catch (Exception e) {
+			log.appendException(e);
+		}
 
+	}
 	public static void createCustomSegment(FlatProgramAPI fpa, FileDataTypeManager fdm, MessageLog log) {
-		// TODO: CIA
 		log.appendMsg("Creating custom chips memory block");
-		var block = createSegment(null, fpa, "Custom", 0xdff000, 0x200, true, false, log);
-		var program = fpa.getCurrentProgram();
 		try {
 			var regs = AmigaUtils.getAmigaDataType(fdm, "Custom");
-			DataUtilities.createData(program, block.getStart(), regs, -1, false, ClearDataMode.CLEAR_ALL_UNDEFINED_CONFLICT_DATA);
-			fpa.createLabel(block.getStart(), "Custom", false);
+			var cia = AmigaUtils.getAmigaDataType(fdm, "CIA");
+			createSegmentIfNeeded(fpa,log,"Custom",regs,0xdff000, 0x200);
+			createSegmentIfNeeded(fpa,log,"CIA_A",cia,0xbfe001, 0xF03);
+			createSegmentIfNeeded(fpa,log,"CIA_B",cia,0xbfd000, 0xF01);
 		} catch (Exception e) {
 			log.appendException(e);
 		}
