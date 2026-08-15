@@ -45,6 +45,10 @@ dependencies {
 	runtimeOnly fileTree(dir: ghidraInstallDir + '/Ghidra', include: "**/*.jar", exclude: project.name + '**')
 }
 
+test {
+	systemProperty 'ghidra.install.dir', ghidraInstallDir
+}
+
 eclipse {
     classpath {
         downloadJavadoc = true

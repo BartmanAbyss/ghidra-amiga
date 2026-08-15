@@ -195,7 +195,8 @@ public class FdParser {
 				assert paren_reg != -1;
 				var func_spc = line.lastIndexOf(' ', paren_arg);
 				assert func_spc != -1;
-				var func = new FdFunction(libname, line.substring(func_spc + 1, paren_arg), line.substring(0, func_spc), offset, false);
+				var func = new FdFunction(libname, line.substring(func_spc + 1, paren_arg),
+						normalizeType(line.substring(0, func_spc)), offset, false);
 
 				var p_arg = paren_arg + 1;
 				var p_reg = paren_reg + 1;
@@ -217,7 +218,7 @@ public class FdParser {
 						var arg_spc = line.lastIndexOf(' ', next);
 						assert arg_spc != -1;
 						if(arg_spc > p_arg) {
-							type = line.substring(p_arg, arg_spc);
+							type = normalizeType(line.substring(p_arg, arg_spc));
 							name = line.substring(arg_spc + 1, next);
 							func.addArg(name, type, reg);
 						}
@@ -236,7 +237,7 @@ public class FdParser {
 						assert func_end != -1;
 	
 						name = line.substring(next + 2, funcptr_paren);
-						type = line.substring(p_arg, next + 2) + line.substring(funcptr_paren, func_end + 1);
+						type = normalizeType(line.substring(p_arg, next + 2) + line.substring(funcptr_paren, func_end + 1));
 						func.addArg(name, type, reg);
 	
 						if(line.charAt(func_end + 1) == ')') // end of args
@@ -259,5 +260,9 @@ public class FdParser {
 		}
 
 		return funcTable;
+	}
+
+	private static String normalizeType(String type) {
+		return type.trim().replaceAll("\\s+", " ");
 	}
 }

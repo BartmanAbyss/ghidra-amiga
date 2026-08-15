@@ -163,8 +163,9 @@ public class AmigaHunkAnalyzer extends AbstractAnalyzer {
 		return true;
 	}
 	
-	private static DataType getAmigaDataType(String type, FileDataTypeManager fdm) {
+	static DataType getAmigaDataType(String type, FileDataTypeManager fdm) {
 		DataType dataType = PointerDataType.dataType;
+		type = type.trim().replaceAll("\\s+", " ");
 		type = type.replace("struct ", "");
 		type = type.replace("const ", "");
 		type = type.replace("CONST ", "");
@@ -172,7 +173,7 @@ public class AmigaHunkAnalyzer extends AbstractAnalyzer {
 		type = type.replace("VOLATILE ", "");
 		if(type.contains("("))
 			return new PointerDataType(new FunctionDefinitionDataType("FUNC")); // TODO: correct function pointer type
-		for(var word : type.split(" ")) {
+		for(var word : type.split("\\s+")) {
 			if(word.equals("*")) {
 				dataType = new PointerDataType(dataType);
 			} else if(word.equals("**")) {

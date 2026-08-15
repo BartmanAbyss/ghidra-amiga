@@ -47,4 +47,12 @@ public class FdParserTest {
 			assertNotNull(entry.getPath(), funcTable);
 		}
 	}
+
+	@Test
+	public void normalizesTabbedObtainGIRPortReturnType() {
+		var funcTable = FdParser.readSfdFile("data/sfd/intuition_lib.sfd");
+		var function = funcTable.getFunctionByName("ObtainGIRPort");
+		assertNotNull(function);
+		assertEquals("struct RastPort *", function.getReturnType());
+	}
 }
