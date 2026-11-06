@@ -390,7 +390,7 @@ public class AmigaHunkLoader extends AbstractLibrarySupportLoader {
 		try {
 			Language importerLanguage = getLanguageService().getLanguage(pair.languageID);
 			imageBase = importerLanguage.getAddressFactory().getDefaultAddressSpace().getAddress(DEF_IMAGE_BASE);
-			list.add(new Option(OPTION_NAME, imageBase, Address.class, Loader.COMMAND_LINE_ARG_PREFIX + "-baseAddr"));
+			list.add(Option.newAddress(OPTION_NAME).value(imageBase).commandLineArgument(Loader.COMMAND_LINE_ARG_PREFIX + "-baseAddr").build());
 		} catch (LanguageNotFoundException e) {
 
 		}

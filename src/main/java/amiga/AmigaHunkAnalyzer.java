@@ -243,29 +243,37 @@ public class AmigaHunkAnalyzer extends AbstractAnalyzer {
 
 					if (mnemonic.equals("jsr") || mnemonic.equals("jmp")) {
 						Object[] objs = instr.getOpObjects(0);
-						Register reg = instr.getRegister(1);
+						// [Ghidra 12.0.1] single opcode
+						int opIndex = 1;
+						Register reg = instr.getRegister(opIndex);
+						if (null == reg && 2 == objs.length && objs[1] instanceof Register) {
+							opIndex = 0;
+							reg = (Register)objs[1];
+						}
 						if (reg != null && reg.getName().equals("A6") && objs.length != 0 && (objs[0] instanceof Scalar)) {
 							int val = (int)((Scalar)objs[0]).getSignedValue();
-							
 							if (val >= 0) {
 								return false;
 							}
+							Reference primaryRef = instr.getPrimaryReference(opIndex);
+							// [nicode] do not override/extend if user-defined primary reference exists
+							if (primaryRef != null && SourceType.USER_DEFINED == primaryRef.getSource()) {
+								return false;
+							}
 							FdFunction[] funcs = funcsList.getLibsFunctionsByBias(filter, val);
-							
 							for (FdFunction func : funcs) {
 								MemoryBlock libMemory = program.getMemory().getBlock(func.getLib());
 								if (libMemory != null) {
 									Address funcStart = libMemory.getStart().add(Math.abs(func.getBias()));
 									if (libMemory.contains(funcStart)) {
-										Reference primaryRef = instr.getPrimaryReference(1);
-
-										instr.addOperandReference(1, funcStart, RefType.CALL_OVERRIDE_UNCONDITIONAL, SourceType.ANALYSIS);
-
+										instr.addOperandReference(opIndex, funcStart, RefType.CALL_OVERRIDE_UNCONDITIONAL, SourceType.ANALYSIS);
+										// make public exec.library function the default primary reference
 										if (((null == primaryRef) || (SourceType.ANALYSIS == primaryRef.getSource())) &&
 												!func.isPrivate() && func.getLib().equals(FdParser.EXEC_LIB)) {
-											for (Reference ref : instr.getOperandReferences(1)) {
+											for (Reference ref : instr.getOperandReferences(opIndex)) {
 												if (funcStart.equals(ref.getToAddress())) {
 													instr.setPrimaryMemoryReference(ref);
+													primaryRef = ref;
 													break;
 												}
 											}
