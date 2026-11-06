@@ -63,7 +63,7 @@ public class AmigaHunkLibFileSystem implements GFileSystem {
 	 * 
 	 * @param monitor A cancellable task monitor.
 	 */
-	public void mount(TaskMonitor monitor) {
+	public void mount(TaskMonitor monitor) throws IOException {
 		monitor.setMessage("Opening " + AmigaHunkLibFileSystem.class.getSimpleName() + "...");
 
 		BinaryReader reader = new BinaryReader(provider, false);
